@@ -1,24 +1,46 @@
 pragma solidity ^0.8.0;
 
+//The AccessControl scheme should eventually be replaced by the ERC725
+//Also, look into ERC734 for key & signature management, and ERC735 (might not be necessary) for identity
+import "OpenZeppelin/openzeppelin-contracts@4.0.0/contracts/access/AccessControl.sol";
 
-import "OpenZeppelin/openzeppelin-contracts@4.0.0/contracts/access/Ownable.sol";
+contract DeSign is AccessControl{
 
-contract DeSign is Ownable{
+    bytes32 public constant SIGNATORY_ROLE = keccak256("SIGNATORY_ROLE");
+
+
+    constructor() {
+    	_setupRole(DEFAULT_ADMIN_ROLE, msg.sender);		//TODO : refactor for ERC 725
+    	_setupRole(SIGNATORY_ROLE, msg.sender);			//TODO : refactor for ERC 725
+    }
+
+	event SignedEntry(address indexed signatory, bytes32 indexed indexHash, IndexEntry indexed indexEntry);
 
 	struct IndexEntry {
-		bytes32 _documentBlockHash;
+		bytes32 _documentVolumeHash;
 		bytes _documentBlockLink;
 		uint _expirationTimestamp;
 	}
 
 	mapping (bytes32 => IndexEntry) private index;
 
-	function indexMerkleRoot(bytes32 _indexHash, bytes32 documentBlockHash, bytes memory documentBlockLink, uint _daysBeforeExpiration) public onlyOwner {
-		index[_indexHash] = IndexEntry(documentBlockHash, documentBlockLink, block.timestamp + (_daysBeforeExpiration * 86400));
+
+	//TODO : refactor for ERC 725
+	modifier onlySignatory{
+
+		require(hasRole(SIGNATORY_ROLE, msg.sender));
+		_;
+	}
+
+
+
+	function signMerkleRoot(bytes32 _indexHash, bytes32 documentVolumeHash, bytes memory documentBlockLink, uint _daysBeforeExpiration) public onlySignatory {
+		index[_indexHash] = IndexEntry(documentVolumeHash, documentBlockLink, block.timestamp + (_daysBeforeExpiration * 86400));
+		emit SignedEntry(msg.sender, _indexHash, index[_indexHash]);
 	}
 
 	function getIndexData(bytes32 _indexHash) public view returns (bytes32, bytes memory, uint){
 		IndexEntry memory entry = index[_indexHash];
-		return (entry._documentBlockHash, entry._documentBlockLink, entry._expirationTimestamp - block.timestamp);
+		return (entry._documentVolumeHash, entry._documentBlockLink, entry._expirationTimestamp - block.timestamp);
 	}
 }

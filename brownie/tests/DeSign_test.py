@@ -23,15 +23,15 @@ def setupVariables():
 def DeSignContract():
 	return DeSign.deploy({'from':owner})
 
-def testCheckOwner(DeSignContract):
-	assert DeSignContract.owner() == owner
+def testCheckRoles(DeSignContract):
+	assert DeSignContract.hasRole(to_bytes(0x00), owner)
 
-def testIndexMerkleRoot(DeSignContract):
+def testsignMerkleRoot(DeSignContract):
 	print("index hash : " + indexHash.hex())
 	print("merkle root / document block hash : " + merkleRoot.hex())
-	DeSignContract.indexMerkleRoot(indexHash, merkleRoot, bytes(documentBlockLink, 'utf-8'), validityTime, {"from":owner})
+	signingTransaction = DeSignContract.signMerkleRoot(indexHash, merkleRoot, bytes(documentBlockLink, 'utf-8'), validityTime, {"from":owner})
 	try:
-		DeSignContract.indexMerkleRoot(indexHash, merkleRoot, bytes(documentBlockLink, 'utf-8'), validityTime, {"from":accounts[1]})
+		DeSignContract.signMerkleRoot(indexHash, merkleRoot, bytes(documentBlockLink, 'utf-8'), validityTime, {"from":accounts[1]})
 		assert False
 	except(VirtualMachineError):
 		assert True
@@ -48,3 +48,12 @@ def testIndexMerkleRoot(DeSignContract):
 	assert indexData[0] == "0x" + merkleRoot.hex()
 	assert indexData[1].decode('utf-8') == documentBlockLink
 	assert indexData[2] <= validityTime * 86400
+
+
+	###################################
+	####test signMerkleRoot events ####
+	###################################
+	"""events = signingTransaction.events
+	print(events)
+	assert False"""
+
