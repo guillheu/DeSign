@@ -15,8 +15,7 @@ import java.sql.Statement;
 
 public class SQLStorage extends DocumentVolumeStorage {
 
-	private static final String dataColumn = "data";
-	
+	private static final String delimiterCharacterInLink = ":";
 	private Connection SQLConnection;
 
 	public SQLStorage(MessageDigest hashAlgo, String connectionLink) {
@@ -33,15 +32,25 @@ public class SQLStorage extends DocumentVolumeStorage {
 
 	@Override
 	public byte[] getDocumentVolumeMerkleRoot(String link) throws Exception {
+		String[] splits = link.split(delimiterCharacterInLink);
+		if(splits.length != 3) {
+			throw new Exception("Invalid link, should contain a single \"" + delimiterCharacterInLink +"\"");
+		}
+		String DB = splits[0];
+		String volumeID = splits[1];
+		String column = splits[2];
 		Statement stmt = null;
 		ResultSet rs = null;
 		byte[] r = null;
+		
+		String query = "SELECT " + column + " FROM " + DB + " WHERE volume_id = " + volumeID + ";";
+		
 		try {
 			stmt = SQLConnection.createStatement();
-			rs = stmt.executeQuery(link);
+			rs = stmt.executeQuery(query);
 			List<String> res = new ArrayList<String>();
 			while(rs.next()) {
-				res.add(DeSignCore.bytesToHexString(hashAlgo.digest(rs.getBytes(dataColumn))));
+				res.add(DeSignCore.bytesToHexString(hashAlgo.digest(rs.getBytes(column))));
 			}
 			r = new MerkleTree(res).getRoot().sig;
 		} catch (SQLException ex) {
@@ -67,9 +76,5 @@ public class SQLStorage extends DocumentVolumeStorage {
 		return r;
 	}
 
-	@Override
-	public void createDocumentVolume(String link, List<byte[]> documentBinaries) throws Exception {
-		
-	}
 
 }

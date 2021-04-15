@@ -13,7 +13,6 @@ public abstract class DocumentVolumeStorage {
 	
 	protected MessageDigest hashAlgo;
 	
-	public abstract void createDocumentVolume(String link, List<byte[]> documentBinaries) throws Exception;
 	public abstract byte[] getDocumentVolumeMerkleRoot(String link) throws Exception;
 	public MessageDigest getHashAlgo() {
 		return hashAlgo;

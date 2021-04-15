@@ -32,18 +32,20 @@ public class DeSign_test {
 	static String nodeURL = "http://127.0.0.1:8545";
 	static Credentials creds = Credentials.create("0xe1b53fdd877a9f3d78cf382d8571a1d357634c55c3f4e83c48f2155ccfdd3518");
 	static DocumentVolumeStorage localStorage;
+	static DocumentVolumeStorage SQLStorage;
 	static DeSignCore dsc;
 	static int daysBeforeExpiration = 365;
 	static int amountOfDocumentsTest = 4;
 	static MessageDigest sha256;
-	static String localBDDConnectionLink = "jdbc:mysql://localhost/?user=test&password=Toto123_";
-	static String SQLTestRequest = "SELECT data FROM test.Documents where volume_id = 1;";
-	static String linkDBVolume1 = "1:data";
+	static String localDBConnectionLink = "jdbc:mysql://localhost/?user=test&password=Toto123_";
+	static String linkDBVolume1 = "test.Documents:1:data";
+	static String linkDBVolume2 = "test.Documents:2:data";
 	static {
 		try {
 			sha256 = MessageDigest.getInstance("SHA-256");
 			dataHash = sha256.digest(FileUtils.readFileToByteArray(new File("src/test/resources/Document")));
 			localStorage =  new TMPLocalFileStorage(sha256);
+			SQLStorage =  new SQLStorage(sha256, localDBConnectionLink);
 			dsc = new DeSignCore(nodeURL, addr, creds, localStorage);
 			Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
 		} catch (NoSuchAlgorithmException e) {
@@ -108,9 +110,6 @@ public class DeSign_test {
 	
 	@Test
 	public void testMerkleStorage() {
-		
-
-		
 		try {
 			System.out.println("volume1 root : " +  DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume1)) + "\n" + 
 			"volume2 root : " + DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume2)));
@@ -119,36 +118,33 @@ public class DeSign_test {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-
-			
-			
-			
-	
-		
-		
 	}
 	
 	@Test
 	public void testIntegration() {
 		try {
-			String oldAddress = dsc.contract.getContractAddress();
-			System.out.println("\n\nINTEGRATION TEST\nPrevious contract address : " + oldAddress);
-			dsc.contract.setContractAddress(DeSign.deploy(dsc.web3, creds, new DefaultGasProvider()).send().getContractAddress());
+			System.out.println("\n\nINTEGRATION TEST\n");
+			DeSignCore localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.web3, creds, new DefaultGasProvider()).send().getContractAddress(), creds, localStorage);
 			System.out.println("smart contract redeployed at address " + dsc.contract.getContractAddress());
-			fullCycle(indexVolume1, linkLocalVolume1, daysBeforeExpiration);
-			fullCycle(indexVolume2, linkLocalVolume2, daysBeforeExpiration);
-			fullCycle(indexVolume1, linkLocalVolume2, daysBeforeExpiration);
-			fullCycle(indexVolume2, linkLocalVolume1, daysBeforeExpiration);
-			System.out.println("Reverting contract address back to " + oldAddress);
-			dsc.contract.setContractAddress(oldAddress);
+			fullCycle(indexVolume1, linkLocalVolume1, daysBeforeExpiration, localDsc);
+			fullCycle(indexVolume2, linkLocalVolume2, daysBeforeExpiration, localDsc);
+			fullCycle(indexVolume1, linkLocalVolume2, daysBeforeExpiration, localDsc);
+			fullCycle(indexVolume2, linkLocalVolume1, daysBeforeExpiration, localDsc);
+			
+			
+
+			localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.web3, creds, new DefaultGasProvider()).send().getContractAddress(), creds, SQLStorage);
+			fullCycle(indexVolume1, linkDBVolume1, daysBeforeExpiration, localDsc);
+			fullCycle(indexVolume2, linkDBVolume1, daysBeforeExpiration, localDsc);
+			fullCycle(indexVolume1, linkDBVolume2, daysBeforeExpiration, localDsc);
+			fullCycle(indexVolume2, linkDBVolume2, daysBeforeExpiration, localDsc);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	private void fullCycle(String index, String link, int lifetime) throws Exception {
+	private void fullCycle(String index, String link, int lifetime, DeSignCore core) throws Exception {
 		System.out.println("*****************************************************\n"+
 				   "********************START OF CYCLE*******************\n"+
 				   "*****************************************************\n\n"+
@@ -161,19 +157,19 @@ public class DeSign_test {
 		
 		
 		
-		String merkleRootStorage = DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(link));
+		String merkleRootStorage = DeSignCore.bytesToHexString(core.storage.getDocumentVolumeMerkleRoot(link));
 		System.out.println("Found merkle root : " + merkleRootStorage);
 		System.out.println("\nSigning & indexing the merkle root on the smart contract");
 		
-		dsc.sign(index, link, lifetime);
+		core.sign(index, link, lifetime);
 		
-		String merkleRootSC = DeSignCore.bytesToHexString(dsc.getIndexInfo(index).component1());
+		String merkleRootSC = DeSignCore.bytesToHexString(core.getIndexInfo(index).component1());
 		
 		System.out.println("Fetched merkle root from smart contract : " + merkleRootSC);
 		System.out.println("Checking signatures...");
 		assertEquals(merkleRootStorage, merkleRootSC);
 		
-		boolean check = dsc.checkSignature(index);
+		boolean check = core.checkSignature(index);
 		assertTrue(check);
 		if(check)
 			System.err.println("Success !\n");
@@ -185,11 +181,13 @@ public class DeSign_test {
 	
 	@Test
 	public void testMySQLStorage() {
-		DocumentVolumeStorage testStorage = new SQLStorage(sha256, localBDDConnectionLink);
+		DocumentVolumeStorage testStorage = new SQLStorage(sha256, localDBConnectionLink);
 		try {
-			byte[] res = testStorage.getDocumentVolumeMerkleRoot(SQLTestRequest);
+			byte[] res = testStorage.getDocumentVolumeMerkleRoot(linkDBVolume1);
 			System.out.println(DeSignCore.bytesToHexString(res));
 			assertTrue(DeSignCore.bytesToHexString(res).equals(DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume1))));
+			
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

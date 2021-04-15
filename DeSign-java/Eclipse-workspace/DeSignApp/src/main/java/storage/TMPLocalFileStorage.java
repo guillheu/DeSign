@@ -40,10 +40,6 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 
 
 
-	@Override
-	public void createDocumentVolume(String link, List<byte[]> documentBinaries) throws Exception {
-		throw new Exception("Not implemented");
-	}
 	
 	
 	

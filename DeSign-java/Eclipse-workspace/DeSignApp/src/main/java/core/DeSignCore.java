@@ -20,7 +20,7 @@ import storage.DocumentVolumeStorage;
 public class DeSignCore {
 	public Web3j web3;
 	public DeSign contract;
-	private DocumentVolumeStorage storage;
+	public DocumentVolumeStorage storage;
 	
 	private MessageDigest sha256;
 	
