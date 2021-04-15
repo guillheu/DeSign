@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutionException;
 
 import org.web3j.crypto.Credentials;
@@ -21,17 +20,9 @@ import storage.DocumentVolumeStorage;
 public class DeSignCore {
 	public Web3j web3;
 	public DeSign contract;
-	public DocumentVolumeStorage storage;
+	private DocumentVolumeStorage storage;
 	
-	public static MessageDigest sha256;
-	static {
-		try {
-			sha256 = MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+	private MessageDigest sha256;
 	
 	/*
 	 * 
@@ -40,6 +31,7 @@ public class DeSignCore {
 	 * */
 	public DeSignCore(String nodeURL, String contractAddr, Credentials credentials, DocumentVolumeStorage storage) {
 		super();
+		sha256 = storage.getHashAlgo();
 		this.storage = storage;
 		web3  = Web3j.build(new HttpService(nodeURL));
 		contract  = DeSign.load(contractAddr, web3, credentials, new DefaultGasProvider());	//TODO : change the gas provider when updating for production

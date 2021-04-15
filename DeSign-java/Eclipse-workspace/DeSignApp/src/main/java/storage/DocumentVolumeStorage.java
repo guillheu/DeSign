@@ -1,7 +1,21 @@
 package storage;
 
-import java.io.IOException;
+import java.security.MessageDigest;
+import java.util.List;
 
-public interface DocumentVolumeStorage {
-	public byte[] getDocumentVolumeMerkleRoot(String link) throws IOException;
+public abstract class DocumentVolumeStorage {
+	
+
+	public DocumentVolumeStorage(MessageDigest hashAlgo) {
+		this.hashAlgo = hashAlgo;
+	}
+	
+	
+	protected MessageDigest hashAlgo;
+	
+	public abstract void createDocumentVolume(String link, List<byte[]> documentBinaries) throws Exception;
+	public abstract byte[] getDocumentVolumeMerkleRoot(String link) throws Exception;
+	public MessageDigest getHashAlgo() {
+		return hashAlgo;
+	}
 }
