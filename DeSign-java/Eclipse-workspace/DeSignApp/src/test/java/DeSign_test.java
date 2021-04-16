@@ -12,7 +12,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.web3j.crypto.Credentials;
 import org.web3j.tuples.generated.Tuple3;
-import org.web3j.tx.gas.DefaultGasProvider;
+import org.web3j.tx.gas.ContractGasProvider;
+import org.web3j.tx.gas.StaticGasProvider;
 
 import contractWrappers.DeSign;
 import core.DeSignCore;
@@ -37,6 +38,9 @@ public class DeSign_test {
 	static int defaultValidityTime;
 	static String localDBConnectionLink;
 	static String privateKey;
+	static BigInteger gasPrice;
+	static BigInteger gasLimit;
+	
 	
 	/*
 	 * 
@@ -46,6 +50,7 @@ public class DeSign_test {
 	
 	static MessageDigest sha256;
 	static Credentials creds;
+	static ContractGasProvider gasProvider;
 	static DeSignCore dsc;
 	
 	/*
@@ -77,6 +82,8 @@ public class DeSign_test {
 			addr = config.getString("blockchain.contractAddr");
 			nodeURL = config.getString("blockchain.nodeURL");
 			defaultValidityTime = config.getInt("documents.defaultValiditytime");
+			gasPrice = new BigInteger(config.getString("blockchain.gasPrice"));
+			gasLimit = new BigInteger(config.getString("blockchain.gasLimit"));
 			
 			
 			System.out.println(localStoragePath);
@@ -84,12 +91,13 @@ public class DeSign_test {
 			
 
 			Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
+			gasProvider = new StaticGasProvider(gasPrice, gasLimit);
 			creds = Credentials.create(privateKey);
 			sha256 = MessageDigest.getInstance(hashAlgo);
 			dataHash = sha256.digest(FileUtils.readFileToByteArray(new File(localStoragePath)));
 			localStorage =  new TMPLocalFileStorage();
 			SQLStorage =  new SQLStorage(sha256, localDBConnectionLink);
-			dsc = new DeSignCore(nodeURL, addr, creds, localStorage, sha256);
+			dsc = new DeSignCore(nodeURL, addr, creds, gasProvider, localStorage, sha256);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -203,7 +211,7 @@ public class DeSign_test {
 	public void testIntegration() {
 		try {
 			System.out.println("\n\nINTEGRATION TEST\n");
-			DeSignCore localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.getWeb3(), creds, new DefaultGasProvider()).send().getContractAddress(), creds, localStorage, sha256);
+			DeSignCore localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.getWeb3(), creds, gasProvider).send().getContractAddress(), creds, gasProvider, localStorage, sha256);
 			System.out.println("smart contract redeployed at address " + dsc.getContract().getContractAddress());
 			fullCycle(indexVolume1, linkLocalVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume2, linkLocalVolume2, defaultValidityTime, localDsc);
@@ -212,7 +220,7 @@ public class DeSign_test {
 			
 			
 
-			localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.getWeb3(), creds, new DefaultGasProvider()).send().getContractAddress(), creds, SQLStorage, sha256);
+			localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.getWeb3(), creds, gasProvider).send().getContractAddress(), creds, gasProvider, SQLStorage, sha256);
 			fullCycle(indexVolume1, linkDBVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume2, linkDBVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume1, linkDBVolume2, defaultValidityTime, localDsc);

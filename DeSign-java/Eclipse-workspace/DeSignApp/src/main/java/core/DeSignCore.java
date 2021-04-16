@@ -10,7 +10,7 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple3;
-import org.web3j.tx.gas.DefaultGasProvider;
+import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.utils.Convert;
 
 import contractWrappers.DeSign;
@@ -21,6 +21,7 @@ public class DeSignCore {
 	private DeSign contract;
 	private DocumentVolumeStorage storage;
 	private MessageDigest hashAlgo;
+	private ContractGasProvider gasProvider;
 	
 	
 	
@@ -29,7 +30,8 @@ public class DeSignCore {
 	}
 	
 	public void setCredentials(Credentials newCreds) {
-		//web3.
+		String currentAddress = contract.getContractAddress();
+		contract = DeSign.load(currentAddress, web3, newCreds, gasProvider);
 	}
 
 	public DeSign getContract() {
@@ -56,15 +58,16 @@ public class DeSignCore {
 	
 	/*
 	 * 
-	 * setup methods
+	 * Constructor
 	 * 
 	 * */
-	public DeSignCore(String nodeURL, String contractAddr, Credentials credentials, DocumentVolumeStorage storage, MessageDigest hashAlgo) {
+	public DeSignCore(String nodeURL, String contractAddr, Credentials credentials, ContractGasProvider gasProvider, DocumentVolumeStorage storage, MessageDigest hashAlgo) {
 		super();
 		this.hashAlgo = hashAlgo;
 		this.storage = storage;
+		this.gasProvider = gasProvider;
 		web3  = Web3j.build(new HttpService(nodeURL));
-		contract  = DeSign.load(contractAddr, web3, credentials, new DefaultGasProvider());	//TODO : change the gas provider when updating for production
+		contract  = DeSign.load(contractAddr, web3, credentials, gasProvider);	//TODO : change the gas provider when updating for production
 	}
 
 	
