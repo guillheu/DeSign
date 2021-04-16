@@ -19,7 +19,6 @@ public class SQLStorage extends DocumentVolumeStorage {
 	private Connection SQLConnection;
 
 	public SQLStorage(MessageDigest hashAlgo, String connectionLink) {
-		super(hashAlgo);
 		try {
             
             SQLConnection = DriverManager.getConnection(connectionLink);
@@ -31,7 +30,7 @@ public class SQLStorage extends DocumentVolumeStorage {
 	}
 
 	@Override
-	public byte[] getDocumentVolumeMerkleRoot(String link) throws Exception {
+	public byte[] getDocumentVolumeMerkleRoot(String link, MessageDigest hashAlgo) throws Exception {
 		String[] splits = link.split(delimiterCharacterInLink);
 		if(splits.length != 3) {
 			throw new Exception("Invalid link, should contain a single \"" + delimiterCharacterInLink +"\" ; was \""+ link + "\"");
@@ -52,7 +51,7 @@ public class SQLStorage extends DocumentVolumeStorage {
 			while(rs.next()) {
 				res.add(DeSignCore.bytesToHexString(hashAlgo.digest(rs.getBytes(column))));
 			}
-			r = new MerkleTree(res).getRoot().sig;
+			r = new MerkleTree(res, hashAlgo).getRoot().sig;
 		} catch (SQLException ex) {
 		    // handle any errors
 		    System.err.println("SQLException: " + ex.getMessage());

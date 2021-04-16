@@ -27,12 +27,10 @@ public class DeSignCore {
 	public Web3j getWeb3() {
 		return web3;
 	}
-
-
-	public void setWeb3(Web3j web3) {
-		this.web3 = web3;
+	
+	public void setCredentials(Credentials newCreds) {
+		//web3.
 	}
-
 
 	public DeSign getContract() {
 		return contract;
@@ -54,14 +52,6 @@ public class DeSignCore {
 	}
 
 
-	public MessageDigest getSha256() {
-		return hashAlgo;
-	}
-
-
-	public void setSha256(MessageDigest sha256) {
-		this.hashAlgo = sha256;
-	}
 
 	
 	/*
@@ -69,9 +59,9 @@ public class DeSignCore {
 	 * setup methods
 	 * 
 	 * */
-	public DeSignCore(String nodeURL, String contractAddr, Credentials credentials, DocumentVolumeStorage storage) {
+	public DeSignCore(String nodeURL, String contractAddr, Credentials credentials, DocumentVolumeStorage storage, MessageDigest hashAlgo) {
 		super();
-		hashAlgo = storage.getHashAlgo();
+		this.hashAlgo = hashAlgo;
 		this.storage = storage;
 		web3  = Web3j.build(new HttpService(nodeURL));
 		contract  = DeSign.load(contractAddr, web3, credentials, new DefaultGasProvider());	//TODO : change the gas provider when updating for production
@@ -107,12 +97,12 @@ public class DeSignCore {
 	 */
 	
 	public void sign(String index, String documentVolumeLink, int lifetime) throws Exception {
-		signMerkleRoot(hashAlgo.digest(index.getBytes()), storage.getDocumentVolumeMerkleRoot(documentVolumeLink), documentVolumeLink.getBytes(), lifetime);
+		signMerkleRoot(hashAlgo.digest(index.getBytes()), storage.getDocumentVolumeMerkleRoot(documentVolumeLink, hashAlgo), documentVolumeLink.getBytes(), lifetime);
 	}
 	
 	public Boolean checkSignature(String index) throws Exception {
 		Tuple3<byte[], byte[], BigInteger> r = getIndexInfo(index);
-		return (bytesToHexString(r.component1()).equals(bytesToHexString(storage.getDocumentVolumeMerkleRoot(new String(r.component2(), StandardCharsets.UTF_8)))));
+		return (bytesToHexString(r.component1()).equals(bytesToHexString(storage.getDocumentVolumeMerkleRoot(new String(r.component2(), StandardCharsets.UTF_8), hashAlgo))));
 	}
 	
 	

@@ -87,9 +87,9 @@ public class DeSign_test {
 			creds = Credentials.create(privateKey);
 			sha256 = MessageDigest.getInstance(hashAlgo);
 			dataHash = sha256.digest(FileUtils.readFileToByteArray(new File(localStoragePath)));
-			localStorage =  new TMPLocalFileStorage(sha256);
+			localStorage =  new TMPLocalFileStorage();
 			SQLStorage =  new SQLStorage(sha256, localDBConnectionLink);
-			dsc = new DeSignCore(nodeURL, addr, creds, localStorage);
+			dsc = new DeSignCore(nodeURL, addr, creds, localStorage, sha256);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -190,9 +190,9 @@ public class DeSign_test {
 	@Test
 	public void testMerkleStorage() {
 		try {
-			System.out.println("volume1 root : " +  DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume1)) + "\n" + 
-			"volume2 root : " + DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume2)));
-			assertNotEquals(DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume1)), DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume2)));
+			System.out.println("volume1 root : " +  DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume1, sha256)) + "\n" + 
+			"volume2 root : " + DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume2, sha256)));
+			assertNotEquals(DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume1, sha256)), DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume2, sha256)));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -203,7 +203,7 @@ public class DeSign_test {
 	public void testIntegration() {
 		try {
 			System.out.println("\n\nINTEGRATION TEST\n");
-			DeSignCore localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.getWeb3(), creds, new DefaultGasProvider()).send().getContractAddress(), creds, localStorage);
+			DeSignCore localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.getWeb3(), creds, new DefaultGasProvider()).send().getContractAddress(), creds, localStorage, sha256);
 			System.out.println("smart contract redeployed at address " + dsc.getContract().getContractAddress());
 			fullCycle(indexVolume1, linkLocalVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume2, linkLocalVolume2, defaultValidityTime, localDsc);
@@ -212,7 +212,7 @@ public class DeSign_test {
 			
 			
 
-			localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.getWeb3(), creds, new DefaultGasProvider()).send().getContractAddress(), creds, SQLStorage);
+			localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.getWeb3(), creds, new DefaultGasProvider()).send().getContractAddress(), creds, SQLStorage, sha256);
 			fullCycle(indexVolume1, linkDBVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume2, linkDBVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume1, linkDBVolume2, defaultValidityTime, localDsc);
@@ -236,7 +236,7 @@ public class DeSign_test {
 		
 		
 		
-		String merkleRootStorage = DeSignCore.bytesToHexString(core.getStorage().getDocumentVolumeMerkleRoot(link));
+		String merkleRootStorage = DeSignCore.bytesToHexString(core.getStorage().getDocumentVolumeMerkleRoot(link, sha256));
 		System.out.println("Found merkle root : " + merkleRootStorage);
 		System.out.println("\nSigning & indexing the merkle root on the smart contract");
 		
@@ -262,9 +262,9 @@ public class DeSign_test {
 	public void testMySQLStorage() {
 		DocumentVolumeStorage testStorage = new SQLStorage(sha256, localDBConnectionLink);
 		try {
-			byte[] res = testStorage.getDocumentVolumeMerkleRoot(linkDBVolume1);
+			byte[] res = testStorage.getDocumentVolumeMerkleRoot(linkDBVolume1, sha256);
 			System.out.println(DeSignCore.bytesToHexString(res));
-			assertTrue(DeSignCore.bytesToHexString(res).equals(DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume1))));
+			assertTrue(DeSignCore.bytesToHexString(res).equals(DeSignCore.bytesToHexString(localStorage.getDocumentVolumeMerkleRoot(linkLocalVolume1, sha256))));
 			
 			
 		} catch (Exception e) {

@@ -13,9 +13,6 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 
 
 
-	public TMPLocalFileStorage(MessageDigest hashAlgo) {
-		super(hashAlgo);
-	}
 
 
 
@@ -24,7 +21,7 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 	
 	
 	@Override
-	public byte[] getDocumentVolumeMerkleRoot(String link) throws Exception {
+	public byte[] getDocumentVolumeMerkleRoot(String link, MessageDigest hashAlgo) throws Exception {
 		ArrayList<byte[]> docSigsBytes = new ArrayList<byte[]>();
 		for(int i = 1; i < maxVolumeSize+1; i++) {
 			docSigsBytes.add(hashAlgo.digest(FileUtils.readFileToByteArray(new File(link + "document" + i))));
@@ -33,7 +30,7 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 		for(byte[] hash : docSigsBytes) {
 			docSigsStrings.add(DeSignCore.bytesToHexString(hash));
 		}
-		MerkleTree tree = new MerkleTree(docSigsStrings);
+		MerkleTree tree = new MerkleTree(docSigsStrings, hashAlgo);
 		return tree.getRoot().sig;
 	}
 

@@ -43,26 +43,21 @@ public class MerkleTree {
   public static final byte LEAF_SIG_TYPE = 0x0;
   public static final byte INTERNAL_SIG_TYPE = 0x01;
   
-  public static MessageDigest sha256;
-	static {
-		try {
-			sha256 = MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+	
   private List<String> leafSigs;
   private Node root;
   private int depth;
   private int nnodes;
+  
+  private MessageDigest hashAlgo;
   
   /**
    * Use this constructor to create a MerkleTree from a list of leaf signatures.
    * The Merkle tree is built from the bottom up.
    * @param leafSignatures
    */
-  public MerkleTree(List<String> leafSignatures) {
+  public MerkleTree(List<String> leafSignatures, MessageDigest hashAlgo) {
+	this.hashAlgo = hashAlgo;
     constructTree(leafSignatures);
   }
   
@@ -255,7 +250,7 @@ public class MerkleTree {
   }
   
   byte[] internalHash(byte[] leftChildSig, byte[] rightChildSig) {
-    return sha256.digest(ArrayUtils.addAll(leftChildSig, rightChildSig));
+    return hashAlgo.digest(ArrayUtils.addAll(leftChildSig, rightChildSig));
   }
 
   
