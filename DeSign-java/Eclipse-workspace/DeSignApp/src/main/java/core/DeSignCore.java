@@ -17,11 +17,52 @@ import contractWrappers.DeSign;
 import storage.DocumentVolumeStorage;
 
 public class DeSignCore {
-	public Web3j web3;
-	public DeSign contract;
-	public DocumentVolumeStorage storage;
+	private Web3j web3;
+	private DeSign contract;
+	private DocumentVolumeStorage storage;
+	private MessageDigest hashAlgo;
 	
-	private MessageDigest sha256;
+	
+	
+	public Web3j getWeb3() {
+		return web3;
+	}
+
+
+	public void setWeb3(Web3j web3) {
+		this.web3 = web3;
+	}
+
+
+	public DeSign getContract() {
+		return contract;
+	}
+
+
+	public void setContract(DeSign contract) {
+		this.contract = contract;
+	}
+
+
+	public DocumentVolumeStorage getStorage() {
+		return storage;
+	}
+
+
+	public void setStorage(DocumentVolumeStorage storage) {
+		this.storage = storage;
+	}
+
+
+	public MessageDigest getSha256() {
+		return hashAlgo;
+	}
+
+
+	public void setSha256(MessageDigest sha256) {
+		this.hashAlgo = sha256;
+	}
+
 	
 	/*
 	 * 
@@ -30,7 +71,7 @@ public class DeSignCore {
 	 * */
 	public DeSignCore(String nodeURL, String contractAddr, Credentials credentials, DocumentVolumeStorage storage) {
 		super();
-		sha256 = storage.getHashAlgo();
+		hashAlgo = storage.getHashAlgo();
 		this.storage = storage;
 		web3  = Web3j.build(new HttpService(nodeURL));
 		contract  = DeSign.load(contractAddr, web3, credentials, new DefaultGasProvider());	//TODO : change the gas provider when updating for production
@@ -44,7 +85,7 @@ public class DeSignCore {
 	 */
 	
 	public Tuple3<byte[], byte[], BigInteger> getIndexInfo(String index) throws Exception {
-		return contract.getIndexData(sha256.digest(index.getBytes())).send();
+		return contract.getIndexData(hashAlgo.digest(index.getBytes())).send();
 		
 	}
 	
@@ -66,7 +107,7 @@ public class DeSignCore {
 	 */
 	
 	public void sign(String index, String documentVolumeLink, int lifetime) throws Exception {
-		signMerkleRoot(sha256.digest(index.getBytes()), storage.getDocumentVolumeMerkleRoot(documentVolumeLink), documentVolumeLink.getBytes(), lifetime);
+		signMerkleRoot(hashAlgo.digest(index.getBytes()), storage.getDocumentVolumeMerkleRoot(documentVolumeLink), documentVolumeLink.getBytes(), lifetime);
 	}
 	
 	public Boolean checkSignature(String index) throws Exception {

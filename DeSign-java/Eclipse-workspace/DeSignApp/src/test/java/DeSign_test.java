@@ -25,22 +25,28 @@ public class DeSign_test {
 
 	/*
 	 * 
-	 * Core variables
+	 * Core config variables
 	 * 
 	 */
 	
 	static String hashAlgo;
-	static byte[] dataHash;
 	static String addr;
 	static String nodeURL;
-	static Credentials creds;
 	static DocumentVolumeStorage localStorage;
 	static DocumentVolumeStorage SQLStorage;
-	static DeSignCore dsc;
 	static int defaultValidityTime;
-	static MessageDigest sha256;
 	static String localDBConnectionLink;
 	static String privateKey;
+	
+	/*
+	 * 
+	 * Core components
+	 * 
+	 */
+	
+	static MessageDigest sha256;
+	static Credentials creds;
+	static DeSignCore dsc;
 	
 	/*
 	 * 
@@ -56,6 +62,7 @@ public class DeSign_test {
 	static String indexVolume2 = "Somebody to love";
 	static String linkLocalVolume1 = "src/test/resources/DocumentVolume1/";
 	static String linkLocalVolume2 = "src/test/resources/DocumentVolume2/";
+	static byte[] dataHash;
 	
 	
 	
@@ -94,7 +101,7 @@ public class DeSign_test {
 	
 
 	public static void main(String args[]) {
-		dsc.storage = SQLStorage;
+		dsc.setStorage(SQLStorage);
 		BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 		int action = 0;
 		try {
@@ -196,8 +203,8 @@ public class DeSign_test {
 	public void testIntegration() {
 		try {
 			System.out.println("\n\nINTEGRATION TEST\n");
-			DeSignCore localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.web3, creds, new DefaultGasProvider()).send().getContractAddress(), creds, localStorage);
-			System.out.println("smart contract redeployed at address " + dsc.contract.getContractAddress());
+			DeSignCore localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.getWeb3(), creds, new DefaultGasProvider()).send().getContractAddress(), creds, localStorage);
+			System.out.println("smart contract redeployed at address " + dsc.getContract().getContractAddress());
 			fullCycle(indexVolume1, linkLocalVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume2, linkLocalVolume2, defaultValidityTime, localDsc);
 			fullCycle(indexVolume1, linkLocalVolume2, defaultValidityTime, localDsc);
@@ -205,7 +212,7 @@ public class DeSign_test {
 			
 			
 
-			localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.web3, creds, new DefaultGasProvider()).send().getContractAddress(), creds, SQLStorage);
+			localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.getWeb3(), creds, new DefaultGasProvider()).send().getContractAddress(), creds, SQLStorage);
 			fullCycle(indexVolume1, linkDBVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume2, linkDBVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume1, linkDBVolume2, defaultValidityTime, localDsc);
@@ -229,7 +236,7 @@ public class DeSign_test {
 		
 		
 		
-		String merkleRootStorage = DeSignCore.bytesToHexString(core.storage.getDocumentVolumeMerkleRoot(link));
+		String merkleRootStorage = DeSignCore.bytesToHexString(core.getStorage().getDocumentVolumeMerkleRoot(link));
 		System.out.println("Found merkle root : " + merkleRootStorage);
 		System.out.println("\nSigning & indexing the merkle root on the smart contract");
 		
