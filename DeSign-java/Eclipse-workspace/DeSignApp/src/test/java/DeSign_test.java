@@ -50,7 +50,8 @@ public class DeSign_test {
 	static MessageDigest sha256;
 	static Credentials creds;
 	static ContractGasProvider gasProvider;
-	static DeSignCore dsc;
+	static DeSignCore coreLocalStorage;
+	static DeSignCore coreSQLDB;
 	
 	/*
 	 * 
@@ -67,6 +68,7 @@ public class DeSign_test {
 	static String linkLocalVolume1 = "src/test/resources/DocumentVolume1/";
 	static String linkLocalVolume2 = "src/test/resources/DocumentVolume2/";
 	static byte[] dataHash;
+
 	
 	
 	
@@ -96,7 +98,8 @@ public class DeSign_test {
 			dataHash = sha256.digest(FileUtils.readFileToByteArray(new File(localStoragePath)));
 			localStorage =  new TMPLocalFileStorage();
 			SQLStorage =  new SQLStorage(sha256, localDBConnectionLink);
-			dsc = new DeSignCore(nodeURL, addr, creds, gasProvider, localStorage, sha256);
+			coreLocalStorage = new DeSignCore(nodeURL, addr, creds, gasProvider, localStorage, sha256);
+			coreSQLDB = new DeSignCore(nodeURL, addr, creds, gasProvider, SQLStorage, sha256);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -108,7 +111,6 @@ public class DeSign_test {
 	
 
 	public static void main(String args[]) {
-		dsc.setStorage(SQLStorage);
 		BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 		int action = 0;
 		try {
@@ -116,8 +118,7 @@ public class DeSign_test {
 				System.out.println("Welcome to DeSign\n\n"
 						+ "node URL : " + nodeURL + "\n"
 						+ "contract address : " + addr + "\n"
-						+ "SQL database connexion link : " + localDBConnectionLink + "\n"
-						+ "Volumes found : " + 2 + "\n\n"
+						+ "SQL database connexion link : " + localDBConnectionLink + "\n\n"
 						+ "What do you want to do ?\n"
 						+ "1) Sign a document volume\n"
 						+ "2) Check a stored signature"
@@ -140,7 +141,7 @@ public class DeSign_test {
 				daysBeforeExpiration = Integer.parseInt(console.readLine());
 				
 				try {
-					dsc.sign(index, volumeLink, daysBeforeExpiration);
+					coreSQLDB.sign(index, volumeLink, daysBeforeExpiration);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -151,7 +152,7 @@ public class DeSign_test {
 				System.out.println("What is the index to check ?");
 				index = console.readLine();
 				try {
-					if(dsc.checkSignature(index)) {
+					if(coreSQLDB.checkSignature(index)) {
 						System.out.println("Signature matched documents !");
 					}
 				} catch (Exception e) {
@@ -173,14 +174,14 @@ public class DeSign_test {
 				"send expiration time = " + defaultValidityTime);
 		
 			try {
-				dsc.signMerkleRoot(sha256.digest(indexVolume1.getBytes()),dataHash, linkLocalVolume1.getBytes(), defaultValidityTime);
+				coreLocalStorage.signMerkleRoot(sha256.digest(indexVolume1.getBytes()),dataHash, linkLocalVolume1.getBytes(), defaultValidityTime);
 			} catch (Exception e) {
 				System.out.println("lol ??");
 				e.printStackTrace();
 			}
 
 			try {
-				Tuple3<byte[], byte[], BigInteger> r = dsc.getIndexInfo(indexVolume1);
+				Tuple3<byte[], byte[], BigInteger> r = coreLocalStorage.getIndexInfo(indexVolume1);
 				System.out.println("received document hash = " + DeSignCore.bytesToHexString(r.component1()) + "\n" +
 						"received link = " + new String(r.component2(), StandardCharsets.UTF_8) + "\n" +
 						"received expiration time = " + r.component3().divide(BigInteger.valueOf(86400)));
@@ -211,7 +212,7 @@ public class DeSign_test {
 		try {
 			System.out.println("\n\nINTEGRATION TEST\n");
 			DeSignCore localDsc = new DeSignCore(nodeURL, creds, gasProvider, localStorage, sha256);
-			System.out.println("smart contract redeployed at address " + dsc.getContract().getContractAddress());
+			System.out.println("smart contract redeployed at address " + coreLocalStorage.getContractAddress());
 			fullCycle(indexVolume1, linkLocalVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume2, linkLocalVolume2, defaultValidityTime, localDsc);
 			fullCycle(indexVolume1, linkLocalVolume2, defaultValidityTime, localDsc);
@@ -243,7 +244,7 @@ public class DeSign_test {
 		
 		
 		
-		String merkleRootStorage = DeSignCore.bytesToHexString(core.getStorage().getDocumentVolumeMerkleRoot(link, sha256));
+		String merkleRootStorage = DeSignCore.bytesToHexString(core.getDocumentVolumeMerkleRoot(link, sha256));
 		System.out.println("Found merkle root : " + merkleRootStorage);
 		System.out.println("\nSigning & indexing the merkle root on the smart contract");
 		

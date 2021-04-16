@@ -23,40 +23,14 @@ public class DeSignCore {
 	private MessageDigest hashAlgo;
 	private ContractGasProvider gasProvider;
 	
-	
-	
-	
-	
-	public void setCredentials(Credentials newCreds) {
-		String currentAddress = contract.getContractAddress();
-		contract = DeSign.load(currentAddress, web3, newCreds, gasProvider);
-	}
 
-	public DeSign getContract() {
-		return contract;
-	}
-
-
-	public void setContract(DeSign contract) {
-		this.contract = contract;
-	}
-
-
-	public DocumentVolumeStorage getStorage() {
-		return storage;
-	}
-
-
-	public void setStorage(DocumentVolumeStorage storage) {
-		this.storage = storage;
-	}
 
 
 
 	
 	/*
 	 * 
-	 * Constructor
+	 * Constructors
 	 * 
 	 * */
 	
@@ -76,6 +50,7 @@ public class DeSignCore {
 		this.gasProvider = gasProvider;
 		web3  = Web3j.build(new HttpService(nodeURL));
 		contract = DeSign.deploy(web3, creds, gasProvider).send();
+		System.err.println("new contract deployed at address " + contract.getContractAddress());
 	}
 	
 	/*
@@ -88,7 +63,6 @@ public class DeSignCore {
 
 	public Tuple3<byte[], byte[], BigInteger> getIndexInfo(String index) throws Exception {
 		return contract.getIndexData(hashAlgo.digest(index.getBytes())).send();
-		
 	}
 	
 	public void signMerkleRoot(byte[] indexHash, byte[] merkleRoot, byte[] link, int daysBeforeExpiration) throws Exception {
@@ -104,7 +78,7 @@ public class DeSignCore {
 	
 	/*
 	 * 
-	 * Coordination functions
+	 * Full flow functions
 	 * 
 	 */
 	
@@ -133,6 +107,24 @@ public class DeSignCore {
     }
 
 
-	 
 
+
+	/*
+	 * 
+	 * Proxy getters & setters
+	 * 
+	 */
+	
+	public String getContractAddress() {
+		return contract.getContractAddress();
+	}
+
+	public byte[] getDocumentVolumeMerkleRoot(String link, MessageDigest hashAlgo) throws Exception {
+		return storage.getDocumentVolumeMerkleRoot(link, hashAlgo);
+	}
+
+	public void setCredentials(Credentials newCreds) {
+		String currentAddress = contract.getContractAddress();
+		contract = DeSign.load(currentAddress, web3, newCreds, gasProvider);
+	}
 }
