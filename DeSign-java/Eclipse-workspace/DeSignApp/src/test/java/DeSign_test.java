@@ -2,13 +2,12 @@ import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.web3j.crypto.Credentials;
@@ -22,58 +21,69 @@ import storage.SQLStorage;
 import storage.TMPLocalFileStorage;
 
 public class DeSign_test {
-	static String indexVolume1 = "A girl with a short skirt and a long jacket";
-	static String indexVolume2 = "Somebody to love";
+	static Configuration config;
+
+	/*
+	 * 
+	 * Core variables
+	 * 
+	 */
+	
+	static String hashAlgo;
 	static byte[] dataHash;
-	static String linkLocalVolume1 = "src/test/resources/DocumentVolume1/";
-	static String linkLocalVolume2 = "src/test/resources/DocumentVolume2/";
-	static String account1 = "0xcC4c253F2210382D8EF88b38DA6a7DB8351EB7b2";
-	static String account2 = "0x74DCaFDc8591f44a1516b0CB2B979223b3c4fad1";
-	static String addr = "0x914938faD3B24002A3416e46F85e69CeB59Ddf17";
-	static String nodeURL = "http://127.0.0.1:8545";
-	static Credentials creds = Credentials.create("0xe1b53fdd877a9f3d78cf382d8571a1d357634c55c3f4e83c48f2155ccfdd3518");
+	static String addr;
+	static String nodeURL;
+	static Credentials creds;
 	static DocumentVolumeStorage localStorage;
 	static DocumentVolumeStorage SQLStorage;
 	static DeSignCore dsc;
-	static int daysBeforeExpiration = 365;
-	static int amountOfDocumentsTest = 4;
+	static int defaultValidityTime;
 	static MessageDigest sha256;
-	static String localDBConnectionLink = "jdbc:mysql://localhost/?user=test&password=Toto123_";
+	static String localDBConnectionLink;
+	static String privateKey;
+	
+	/*
+	 * 
+	 * Arbitraty test values
+	 * 
+	 */
+
+	static String localStoragePath = "src/test/resources/Document";
 	static String linkDBVolume1 = "test.Documents:1:data";
 	static String linkDBVolume2 = "test.Documents:2:data";
+	static int amountOfDocumentsTest = 4;
+	static String indexVolume1 = "A girl with a short skirt and a long jacket";
+	static String indexVolume2 = "Somebody to love";
+	static String linkLocalVolume1 = "src/test/resources/DocumentVolume1/";
+	static String linkLocalVolume2 = "src/test/resources/DocumentVolume2/";
+	
+	
+	
 	static {
 		try {
-			sha256 = MessageDigest.getInstance("SHA-256");
-			dataHash = sha256.digest(FileUtils.readFileToByteArray(new File("src/test/resources/Document")));
+			config = (new Configurations()).properties(new File("src/test/resources/testConfig.properties"));
+			
+			hashAlgo = config.getString("crypto.hashAlgo");
+			localDBConnectionLink = config.getString("storage.SQLconnexionLink");
+			privateKey = config.getString("blockchain.privKey");
+			//localStoragePath = config.getString("storage.localPath");
+			addr = config.getString("blockchain.contractAddr");
+			nodeURL = config.getString("blockchain.nodeURL");
+			defaultValidityTime = config.getInt("documents.defaultValiditytime");
+			
+			
+			System.out.println(localStoragePath);
+			System.out.println(localDBConnectionLink);
+			
+
+			Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
+			creds = Credentials.create(privateKey);
+			sha256 = MessageDigest.getInstance(hashAlgo);
+			dataHash = sha256.digest(FileUtils.readFileToByteArray(new File(localStoragePath)));
 			localStorage =  new TMPLocalFileStorage(sha256);
 			SQLStorage =  new SQLStorage(sha256, localDBConnectionLink);
 			dsc = new DeSignCore(nodeURL, addr, creds, localStorage);
-			Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -146,10 +156,10 @@ public class DeSign_test {
 	public void testIndexation() {		
 		System.out.println("send document hash = " + DeSignCore.bytesToHexString(dataHash) + "\n" +
 				"send link = " + linkLocalVolume1 + "\n" +
-				"send expiration time = " + daysBeforeExpiration);
+				"send expiration time = " + defaultValidityTime);
 		
 			try {
-				dsc.signMerkleRoot(sha256.digest(indexVolume1.getBytes()),dataHash, linkLocalVolume1.getBytes(), daysBeforeExpiration);
+				dsc.signMerkleRoot(sha256.digest(indexVolume1.getBytes()),dataHash, linkLocalVolume1.getBytes(), defaultValidityTime);
 			} catch (Exception e) {
 				System.out.println("lol ??");
 				e.printStackTrace();
@@ -164,7 +174,7 @@ public class DeSign_test {
 				
 				assertEquals(DeSignCore.bytesToHexString(r.component1()), DeSignCore.bytesToHexString(dataHash));
 				assertEquals(new String(r.component2(), StandardCharsets.UTF_8), linkLocalVolume1);
-				assertEquals(r.component3().divide(BigInteger.valueOf(86400)).intValue(), daysBeforeExpiration);
+				assertEquals(r.component3().divide(BigInteger.valueOf(86400)).intValue(), defaultValidityTime);
 			} catch (Exception e) {
 				//e.printStackTrace();
 			}
@@ -188,18 +198,18 @@ public class DeSign_test {
 			System.out.println("\n\nINTEGRATION TEST\n");
 			DeSignCore localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.web3, creds, new DefaultGasProvider()).send().getContractAddress(), creds, localStorage);
 			System.out.println("smart contract redeployed at address " + dsc.contract.getContractAddress());
-			fullCycle(indexVolume1, linkLocalVolume1, daysBeforeExpiration, localDsc);
-			fullCycle(indexVolume2, linkLocalVolume2, daysBeforeExpiration, localDsc);
-			fullCycle(indexVolume1, linkLocalVolume2, daysBeforeExpiration, localDsc);
-			fullCycle(indexVolume2, linkLocalVolume1, daysBeforeExpiration, localDsc);
+			fullCycle(indexVolume1, linkLocalVolume1, defaultValidityTime, localDsc);
+			fullCycle(indexVolume2, linkLocalVolume2, defaultValidityTime, localDsc);
+			fullCycle(indexVolume1, linkLocalVolume2, defaultValidityTime, localDsc);
+			fullCycle(indexVolume2, linkLocalVolume1, defaultValidityTime, localDsc);
 			
 			
 
 			localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.web3, creds, new DefaultGasProvider()).send().getContractAddress(), creds, SQLStorage);
-			fullCycle(indexVolume1, linkDBVolume1, daysBeforeExpiration, localDsc);
-			fullCycle(indexVolume2, linkDBVolume1, daysBeforeExpiration, localDsc);
-			fullCycle(indexVolume1, linkDBVolume2, daysBeforeExpiration, localDsc);
-			fullCycle(indexVolume2, linkDBVolume2, daysBeforeExpiration, localDsc);
+			fullCycle(indexVolume1, linkDBVolume1, defaultValidityTime, localDsc);
+			fullCycle(indexVolume2, linkDBVolume1, defaultValidityTime, localDsc);
+			fullCycle(indexVolume1, linkDBVolume2, defaultValidityTime, localDsc);
+			fullCycle(indexVolume2, linkDBVolume2, defaultValidityTime, localDsc);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

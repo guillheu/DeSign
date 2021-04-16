@@ -1,7 +1,6 @@
 package storage;
 
 import java.security.MessageDigest;
-import java.util.List;
 
 public abstract class DocumentVolumeStorage {
 	
