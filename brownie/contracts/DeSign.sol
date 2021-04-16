@@ -18,7 +18,6 @@ contract DeSign is AccessControl{
 
 	struct IndexEntry {
 		bytes32 _documentVolumeHash;
-		bytes _documentBlockLink;
 		uint _expirationTimestamp;
 	}
 
@@ -34,13 +33,13 @@ contract DeSign is AccessControl{
 
 
 
-	function signMerkleRoot(bytes32 _indexHash, bytes32 documentVolumeHash, bytes memory documentBlockLink, uint _daysBeforeExpiration) public onlySignatory {
-		index[_indexHash] = IndexEntry(documentVolumeHash, documentBlockLink, block.timestamp + (_daysBeforeExpiration * 86400));
+	function signMerkleRoot(bytes32 _indexHash, bytes32 documentVolumeHash, uint _daysBeforeExpiration) public onlySignatory {
+		index[_indexHash] = IndexEntry(documentVolumeHash, block.timestamp + (_daysBeforeExpiration * 86400));
 		emit SignedEntry(msg.sender, _indexHash, index[_indexHash]);
 	}
 
-	function getIndexData(bytes32 _indexHash) public view returns (bytes32, bytes memory, uint){
+	function getIndexData(bytes32 _indexHash) public view returns (bytes32, uint){
 		IndexEntry memory entry = index[_indexHash];
-		return (entry._documentVolumeHash, entry._documentBlockLink, entry._expirationTimestamp - block.timestamp);
+		return (entry._documentVolumeHash, entry._expirationTimestamp - block.timestamp);
 	}
 }

@@ -14,6 +14,13 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 
 
 
+	private String rootStoragePath;
+
+	public TMPLocalFileStorage(String rootStoragePath) {
+		super();
+		this.rootStoragePath = rootStoragePath;
+	}
+
 
 
 	public static final int maxVolumeSize = 4;
@@ -21,10 +28,11 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 	
 	
 	@Override
-	public byte[] getDocumentVolumeMerkleRoot(String link, MessageDigest hashAlgo) throws Exception {
+	public byte[] getIndexedDocumentVolumeMerkleRoot(String index, MessageDigest hashAlgo) throws Exception {
+		String indexHash = DeSignCore.bytesToHexString(hashAlgo.digest(index.getBytes()));
 		ArrayList<byte[]> docSigsBytes = new ArrayList<byte[]>();
 		for(int i = 1; i < maxVolumeSize+1; i++) {
-			docSigsBytes.add(hashAlgo.digest(FileUtils.readFileToByteArray(new File(link + "document" + i))));
+			docSigsBytes.add(hashAlgo.digest(FileUtils.readFileToByteArray(new File(rootStoragePath + indexHash + "/document" + i))));
 		}
 		ArrayList<String> docSigsStrings = new ArrayList<String>();
 		for(byte[] hash : docSigsBytes) {
@@ -34,13 +42,6 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 		return tree.getRoot().sig;
 	}
 
-
-
-	@Override
-	public String getLinkFromVolumeID(String volumeID) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 
 
