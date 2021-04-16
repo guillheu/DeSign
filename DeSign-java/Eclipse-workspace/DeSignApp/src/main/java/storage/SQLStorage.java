@@ -34,7 +34,7 @@ public class SQLStorage extends DocumentVolumeStorage {
 	public byte[] getDocumentVolumeMerkleRoot(String link) throws Exception {
 		String[] splits = link.split(delimiterCharacterInLink);
 		if(splits.length != 3) {
-			throw new Exception("Invalid link, should contain a single \"" + delimiterCharacterInLink +"\"");
+			throw new Exception("Invalid link, should contain a single \"" + delimiterCharacterInLink +"\" ; was \""+ link + "\"");
 		}
 		String DB = splits[0];
 		String volumeID = splits[1];
@@ -76,5 +76,9 @@ public class SQLStorage extends DocumentVolumeStorage {
 		return r;
 	}
 
+	
+
+	
+	
 
 }

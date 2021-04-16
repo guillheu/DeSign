@@ -1,13 +1,14 @@
 import static org.junit.Assert.*;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.web3j.crypto.Credentials;
@@ -79,6 +80,67 @@ public class DeSign_test {
 	}
 	
 
+	
+	
+
+	public static void main(String args[]) {
+		dsc.storage = SQLStorage;
+		BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+		int action = 0;
+		try {
+			while(action != 1 && action != 2) {
+				System.out.println("Welcome to DeSign\n\n"
+						+ "node URL : " + nodeURL + "\n"
+						+ "contract address : " + addr + "\n"
+						+ "SQL database connexion link : " + localDBConnectionLink + "\n"
+						+ "Volumes found : " + 2 + "\n\n"
+						+ "What do you want to do ?\n"
+						+ "1) Sign a document volume\n"
+						+ "2) Check a stored signature"
+						);
+				try {
+					action = Integer.parseInt(console.readLine());
+				} catch (Exception e) {
+					System.err.println("please enter a valid number");
+				}
+			}
+			if(action == 1) {
+				String volumeLink;
+				String index;
+				int daysBeforeExpiration;
+				System.out.println("What is the document volume link ?");
+				volumeLink = console.readLine();
+				System.out.println("What is the index ?");
+				index = console.readLine();
+				System.out.println("How many days before documents expiration ?");
+				daysBeforeExpiration = Integer.parseInt(console.readLine());
+				
+				try {
+					dsc.sign(index, volumeLink, daysBeforeExpiration);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else if(action == 2) {
+				String index;
+				System.out.println("What is the index to check ?");
+				index = console.readLine();
+				try {
+					if(dsc.checkSignature(index)) {
+						System.out.println("Signature matched documents !");
+					}
+				} catch (Exception e) {
+					System.err.println("Something went wrong");
+					e.printStackTrace();
+				}
+			}
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	
 	@Test
 	public void testIndexation() {		
