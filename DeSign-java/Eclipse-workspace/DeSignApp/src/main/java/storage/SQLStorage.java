@@ -17,8 +17,10 @@ public class SQLStorage extends DocumentVolumeStorage {
 
 	private static final String delimiterCharacterInLink = ":";
 	private Connection SQLConnection;
+	private String DBName, tableName, volumeIdcolumnName, dataColumnName;
 
-	public SQLStorage(MessageDigest hashAlgo, String connectionLink) {
+	public SQLStorage(MessageDigest hashAlgo, String connectionLink, String DBName, String tableName, String volumeIdColumnName, String dataColumnName) {
+		
 		try {
             
             SQLConnection = DriverManager.getConnection(connectionLink);
@@ -27,6 +29,10 @@ public class SQLStorage extends DocumentVolumeStorage {
             e.printStackTrace();
             System.err.println("\n/!\\Make sure to load the SQL driver before calling this/!\\");
         }
+		this.DBName = DBName;
+		this.tableName = tableName;
+		this.volumeIdcolumnName = volumeIdColumnName;
+		this.dataColumnName = dataColumnName;
 	}
 
 	@Override
@@ -42,7 +48,7 @@ public class SQLStorage extends DocumentVolumeStorage {
 		ResultSet rs = null;
 		byte[] r = null;
 		
-		String query = "SELECT " + column + " FROM " + DB + " WHERE volume_id = " + volumeID + ";";
+		String query = "SELECT " + column + " FROM " + DB + " WHERE "+ volumeIdcolumnName +" = " + volumeID + ";";
 		
 		try {
 			stmt = SQLConnection.createStatement();
@@ -73,6 +79,11 @@ public class SQLStorage extends DocumentVolumeStorage {
 		    }
 		}
 		return r;
+	}
+
+	@Override
+	public String getLinkFromVolumeID(String volumeID) {
+		return DBName + "." + tableName + ":[VOLUME_ID]:"+ dataColumnName;
 	}
 
 	

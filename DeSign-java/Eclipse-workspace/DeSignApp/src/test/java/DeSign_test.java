@@ -39,6 +39,11 @@ public class DeSign_test {
 	static String privateKey;
 	static BigInteger gasPrice;
 	static BigInteger gasLimit;
+	static String SQLDBName;
+	static String SQLTableName;
+	static String SQLVolumeIDColumnName;
+	static String SQLDataColumnName;
+	
 	
 	
 	/*
@@ -50,6 +55,7 @@ public class DeSign_test {
 	static MessageDigest sha256;
 	static Credentials creds;
 	static ContractGasProvider gasProvider;
+	static String SQLLinkTemplate;
 	static DeSignCore coreLocalStorage;
 	static DeSignCore coreSQLDB;
 	
@@ -59,10 +65,10 @@ public class DeSign_test {
 	 * 
 	 */
 
+	static String configFilePath = "src/test/resources/testConfig.properties";
 	static String localStoragePath = "src/test/resources/Document";
 	static String linkDBVolume1 = "test.Documents:1:data";
 	static String linkDBVolume2 = "test.Documents:2:data";
-	static int amountOfDocumentsTest = 4;
 	static String indexVolume1 = "A girl with a short skirt and a long jacket";
 	static String indexVolume2 = "Somebody to love";
 	static String linkLocalVolume1 = "src/test/resources/DocumentVolume1/";
@@ -74,21 +80,24 @@ public class DeSign_test {
 	
 	static {
 		try {
-			config = (new Configurations()).properties(new File("src/test/resources/testConfig.properties"));
-			
-			hashAlgo = config.getString("crypto.hashAlgo");
-			localDBConnectionLink = config.getString("storage.SQLconnexionLink");
-			privateKey = config.getString("blockchain.privKey");
-			//localStoragePath = config.getString("storage.localPath");
-			addr = config.getString("blockchain.contractAddr");
-			nodeURL = config.getString("blockchain.nodeURL");
-			defaultValidityTime = config.getInt("documents.defaultValiditytime");
-			gasPrice = new BigInteger(config.getString("blockchain.gasPrice"));
-			gasLimit = new BigInteger(config.getString("blockchain.gasLimit"));
+			config = (new Configurations()).properties(new File(configFilePath));
 			
 			
-			System.out.println(localStoragePath);
-			System.out.println(localDBConnectionLink);
+			//setting values from config file
+			hashAlgo = 					config.getString("crypto.hashAlgo");
+			localDBConnectionLink = 	config.getString("storage.SQLconnexionLink");
+			privateKey = 				config.getString("blockchain.privKey");
+			addr = 						config.getString("blockchain.contractAddr");
+			nodeURL = 					config.getString("blockchain.nodeURL");
+			defaultValidityTime = 		config.getInt("documents.defaultValiditytime");
+			gasPrice = 					new BigInteger(config.getString("blockchain.gasPrice"));
+			gasLimit = 					new BigInteger(config.getString("blockchain.gasLimit"));
+			SQLDBName = 				config.getString("storage.SQLDBName");
+			SQLTableName = 				config.getString("storage.SQLTableName");
+			SQLVolumeIDColumnName = 	config.getString("storage.SQLVolumeIDColumnName");
+			SQLDataColumnName = 		config.getString("storage.SQLDataColumnName");
+			
+			
 			
 
 			Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
@@ -97,7 +106,7 @@ public class DeSign_test {
 			sha256 = MessageDigest.getInstance(hashAlgo);
 			dataHash = sha256.digest(FileUtils.readFileToByteArray(new File(localStoragePath)));
 			localStorage =  new TMPLocalFileStorage();
-			SQLStorage =  new SQLStorage(sha256, localDBConnectionLink);
+			SQLStorage =  new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName);
 			coreLocalStorage = new DeSignCore(nodeURL, addr, creds, gasProvider, localStorage, sha256);
 			coreSQLDB = new DeSignCore(nodeURL, addr, creds, gasProvider, SQLStorage, sha256);
 		} catch (Exception e) {
@@ -130,18 +139,18 @@ public class DeSign_test {
 				}
 			}
 			if(action == 1) {
-				String volumeLink;
+				String volumeId;
 				String index;
 				int daysBeforeExpiration;
-				System.out.println("What is the document volume link ?");
-				volumeLink = console.readLine();
+				System.out.println("What is the document volume id ?");
+				volumeId = console.readLine();
 				System.out.println("What is the index ?");
 				index = console.readLine();
 				System.out.println("How many days before documents expiration ?");
 				daysBeforeExpiration = Integer.parseInt(console.readLine());
 				
 				try {
-					coreSQLDB.sign(index, volumeLink, daysBeforeExpiration);
+					coreSQLDB.sign(index, volumeId, daysBeforeExpiration);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -268,7 +277,7 @@ public class DeSign_test {
 	
 	@Test
 	public void testMySQLStorage() {
-		DocumentVolumeStorage testStorage = new SQLStorage(sha256, localDBConnectionLink);
+		DocumentVolumeStorage testStorage = new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName);
 		try {
 			byte[] res = testStorage.getDocumentVolumeMerkleRoot(linkDBVolume1, sha256);
 			System.out.println(DeSignCore.bytesToHexString(res));

@@ -36,6 +36,14 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 
 
 
+	@Override
+	public String getLinkFromVolumeID(String volumeID) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
 	
 	
 	
