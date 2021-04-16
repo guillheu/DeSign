@@ -25,9 +25,7 @@ public class DeSignCore {
 	
 	
 	
-	public Web3j getWeb3() {
-		return web3;
-	}
+	
 	
 	public void setCredentials(Credentials newCreds) {
 		String currentAddress = contract.getContractAddress();
@@ -61,15 +59,24 @@ public class DeSignCore {
 	 * Constructor
 	 * 
 	 * */
+	
+	//To use with a pre-deployed contract
 	public DeSignCore(String nodeURL, String contractAddr, Credentials credentials, ContractGasProvider gasProvider, DocumentVolumeStorage storage, MessageDigest hashAlgo) {
-		super();
 		this.hashAlgo = hashAlgo;
 		this.storage = storage;
 		this.gasProvider = gasProvider;
 		web3  = Web3j.build(new HttpService(nodeURL));
-		contract  = DeSign.load(contractAddr, web3, credentials, gasProvider);	//TODO : change the gas provider when updating for production
+		contract  = DeSign.load(contractAddr, web3, credentials, gasProvider);
 	}
-
+	
+	//Will deploy a contract
+	public DeSignCore(String nodeURL, Credentials creds, ContractGasProvider gasProvider, DocumentVolumeStorage storage, MessageDigest hashAlgo) throws Exception {
+		this.hashAlgo = hashAlgo;
+		this.storage = storage;
+		this.gasProvider = gasProvider;
+		web3  = Web3j.build(new HttpService(nodeURL));
+		contract = DeSign.deploy(web3, creds, gasProvider).send();
+	}
 	
 	/*
 	 * 
@@ -77,6 +84,8 @@ public class DeSignCore {
 	 * 
 	 */
 	
+	
+
 	public Tuple3<byte[], byte[], BigInteger> getIndexInfo(String index) throws Exception {
 		return contract.getIndexData(hashAlgo.digest(index.getBytes())).send();
 		

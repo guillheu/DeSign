@@ -15,7 +15,6 @@ import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 
-import contractWrappers.DeSign;
 import core.DeSignCore;
 import storage.DocumentVolumeStorage;
 import storage.SQLStorage;
@@ -211,7 +210,7 @@ public class DeSign_test {
 	public void testIntegration() {
 		try {
 			System.out.println("\n\nINTEGRATION TEST\n");
-			DeSignCore localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.getWeb3(), creds, gasProvider).send().getContractAddress(), creds, gasProvider, localStorage, sha256);
+			DeSignCore localDsc = new DeSignCore(nodeURL, creds, gasProvider, localStorage, sha256);
 			System.out.println("smart contract redeployed at address " + dsc.getContract().getContractAddress());
 			fullCycle(indexVolume1, linkLocalVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume2, linkLocalVolume2, defaultValidityTime, localDsc);
@@ -220,7 +219,7 @@ public class DeSign_test {
 			
 			
 
-			localDsc = new DeSignCore(nodeURL, DeSign.deploy(dsc.getWeb3(), creds, gasProvider).send().getContractAddress(), creds, gasProvider, SQLStorage, sha256);
+			localDsc = new DeSignCore(nodeURL, creds, gasProvider, SQLStorage, sha256);
 			fullCycle(indexVolume1, linkDBVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume2, linkDBVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume1, linkDBVolume2, defaultValidityTime, localDsc);
