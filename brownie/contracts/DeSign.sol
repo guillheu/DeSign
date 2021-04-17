@@ -1,4 +1,4 @@
-pragma solidity ^0.8.0;
+pragma solidity 0.8.3;
 
 //The AccessControl scheme should eventually be replaced by the ERC725
 //Also, look into ERC734 for key & signature management, and ERC735 (might not be necessary) for identity
@@ -48,18 +48,18 @@ contract DeSign is AccessControl{
  */
 	modifier onlySignatory{
 
-		require(hasRole(SIGNATORY_ROLE, msg.sender));
+		require(hasRole(SIGNATORY_ROLE, msg.sender), "MUST BE SIGNATORY");
 		_;
 	}
 
 /**
  * @notice indexes a fingerprint to a given index and implicitly considers it a signature by the caller. The caller must have the signatory role. This function is index agnostic ; the index can be anything, like a date, a location, a person. The fingerprint and index are identifyable, but not readable : even if they're derived from sensitive information, that information is never shared with the blockchain, and they cannot be reverted to their original content.
- * @dev The index hashing algorithm has to remain consistent accross all signatures ; there is currently no on-chain check for the hashing algorithm used. You are responsible for the hashing of your own signatures.
+ * @dev The index hashing algorithm has to remain consistent accross all signatures ; there is currently no on-chain check for the hashing algorithm used. You are responsible for the hashing of your own signatures. Emits a {SignedEntry} event.
  * @param _indexHash A 32 bytes long hash of whatever index is used to identify a document volume. It has to match the index used to identify the document volume in the back-end storage system of the client.
  * @param documentVolumeHash A 32 bytes long hash that can be systematically generated from any document or set of documents, for example using a Merkle tree root.
  * @param _daysBeforeExpiration The amount of days before the signature is considered invalid. This is to let users know that beyond the expiration date, the signatory is no longer committed to certifying the documents or even to keep them in their back-end storage.
  */
-	function signMerkleRoot(bytes32 _indexHash, bytes32 documentVolumeHash, uint _daysBeforeExpiration) public onlySignatory {
+	function signMerkleRoot(bytes32 _indexHash, bytes32 documentVolumeHash, uint _daysBeforeExpiration) external onlySignatory {
 		index[_indexHash] = IndexEntry(documentVolumeHash, block.timestamp + (_daysBeforeExpiration * 86400));
 		emit SignedEntry(msg.sender, _indexHash, index[_indexHash]);
 	}
@@ -71,7 +71,7 @@ contract DeSign is AccessControl{
  * @return The lifetime of the signature in seconds. If a negative value, the signature is no longer valid.
  */
 
-	function getIndexData(bytes32 _indexHash) public view returns (bytes32, uint){
+	function getIndexData(bytes32 _indexHash) external view returns (bytes32, uint){
 		IndexEntry memory entry = index[_indexHash];
 		return (entry._documentVolumeHash, entry._expirationTimestamp - block.timestamp);
 	}
