@@ -1,3 +1,5 @@
+//SPDX-License-Identifier: UNLICENSED
+
 pragma solidity 0.8.3;
 
 //The AccessControl scheme should eventually be replaced by the ERC725
@@ -57,10 +59,10 @@ contract DeSign is AccessControl{
  * @dev The index hashing algorithm has to remain consistent accross all signatures ; there is currently no on-chain check for the hashing algorithm used. You are responsible for the hashing of your own signatures. Emits a {SignedEntry} event.
  * @param _indexHash A 32 bytes long hash of whatever index is used to identify a document volume. It has to match the index used to identify the document volume in the back-end storage system of the client.
  * @param documentVolumeHash A 32 bytes long hash that can be systematically generated from any document or set of documents, for example using a Merkle tree root.
- * @param _daysBeforeExpiration The amount of days before the signature is considered invalid. This is to let users know that beyond the expiration date, the signatory is no longer committed to certifying the documents or even to keep them in their back-end storage.
+ * @param _secondsBeforeExpiration The amount of seconds before the signature is considered invalid. This is to let users know that beyond the expiration date, the signatory is no longer committed to certifying the documents or even to keep them in their back-end storage.
  */
-	function signMerkleRoot(bytes32 _indexHash, bytes32 documentVolumeHash, uint _daysBeforeExpiration) external onlySignatory {
-		index[_indexHash] = IndexEntry(documentVolumeHash, block.timestamp + (_daysBeforeExpiration * 86400));
+	function signMerkleRoot(bytes32 _indexHash, bytes32 documentVolumeHash, uint _secondsBeforeExpiration) external onlySignatory {
+		index[_indexHash] = IndexEntry(documentVolumeHash, block.timestamp + _secondsBeforeExpiration);
 		emit SignedEntry(msg.sender, _indexHash, index[_indexHash]);
 	}
 

@@ -44,7 +44,7 @@ def testsignMerkleRoot(DeSignContract):
 	indexData = DeSignContract.getIndexData(indexHash)
 	print(indexData)
 	assert indexData[0] == "0x" + merkleRoot.hex()
-	assert indexData[1] <= validityTime * 86400
+	assert indexData[1] <= validityTime
 
 	try:
 		indexData = DeSignContract.getIndexData(to_bytes(hashlib.sha256("an unused index".encode()).hexdigest()))

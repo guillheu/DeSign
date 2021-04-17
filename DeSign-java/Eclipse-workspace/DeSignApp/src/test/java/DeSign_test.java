@@ -198,7 +198,7 @@ public class DeSign_test {
 				
 				
 				assertEquals(DeSignCore.bytesToHexString(r.component1()), DeSignCore.bytesToHexString(dataHash));
-				assertEquals(r.component2().divide(BigInteger.valueOf(86400)).intValue(), defaultValidityTime);
+				assertEquals(r.component2().intValue(), defaultValidityTime);
 			} catch (Exception e) {
 				//e.printStackTrace();
 			}
