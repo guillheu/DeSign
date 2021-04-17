@@ -15,8 +15,6 @@ def setupVariables():
 	merkleRoot = to_bytes(hashlib.sha256("THIS IS A BLOCK OF DOCUMENTS".encode()).hexdigest())
 	global validityTime
 	validityTime = 365
-	global documentBlockLink
-	documentBlockLink = "SQL SIGMA BALLS"
 
 
 @pytest.fixture
@@ -29,9 +27,9 @@ def testCheckRoles(DeSignContract):
 def testsignMerkleRoot(DeSignContract):
 	print("index hash : " + indexHash.hex())
 	print("merkle root / document block hash : " + merkleRoot.hex())
-	signingTransaction = DeSignContract.signMerkleRoot(indexHash, merkleRoot, bytes(documentBlockLink, 'utf-8'), validityTime, {"from":owner})
+	signingTransaction = DeSignContract.signMerkleRoot(indexHash, merkleRoot, validityTime, {"from":owner})
 	try:
-		DeSignContract.signMerkleRoot(indexHash, merkleRoot, bytes(documentBlockLink, 'utf-8'), validityTime, {"from":accounts[1]})
+		DeSignContract.signMerkleRoot(indexHash, merkleRoot, validityTime, {"from":accounts[1]})
 		assert False
 	except(VirtualMachineError):
 		assert True
@@ -46,8 +44,14 @@ def testsignMerkleRoot(DeSignContract):
 	indexData = DeSignContract.getIndexData(indexHash)
 	print(indexData)
 	assert indexData[0] == "0x" + merkleRoot.hex()
-	assert indexData[1].decode('utf-8') == documentBlockLink
-	assert indexData[2] <= validityTime * 86400
+	assert indexData[1] <= validityTime * 86400
+
+	try:
+		indexData = DeSignContract.getIndexData(to_bytes(hashlib.sha256("an unused index".encode()).hexdigest()))
+	except(VirtualMachineError):
+		assert True
+	else:
+		assert False
 
 
 	###################################
@@ -55,5 +59,5 @@ def testsignMerkleRoot(DeSignContract):
 	###################################
 	"""events = signingTransaction.events
 	print(events)
-	assert False"""
+	//!\\BROWNIE HAS A KNOWN BUG WHICH PREVENTS THE USE OF EVENTS THAT CONTAIN STRUCTURES"""
 
