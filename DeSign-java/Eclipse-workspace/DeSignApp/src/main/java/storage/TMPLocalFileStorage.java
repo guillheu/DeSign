@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import org.apache.commons.io.FileUtils;
 
 import core.DeSignCore;
+import util.BytesUtils;
 import util.MerkleTree;
 
 public class TMPLocalFileStorage extends DocumentVolumeStorage {
@@ -29,14 +30,14 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 	
 	@Override
 	public byte[] getIndexedDocumentVolumeMerkleRoot(String index, MessageDigest hashAlgo) throws Exception {
-		String indexHash = DeSignCore.bytesToHexString(hashAlgo.digest(index.getBytes()));
+		String indexHash = BytesUtils.bytesToHexString(hashAlgo.digest(index.getBytes()));
 		ArrayList<byte[]> docSigsBytes = new ArrayList<byte[]>();
 		for(int i = 1; i < maxVolumeSize+1; i++) {
 			docSigsBytes.add(hashAlgo.digest(FileUtils.readFileToByteArray(new File(rootStoragePath + indexHash + "/document" + i))));
 		}
 		ArrayList<String> docSigsStrings = new ArrayList<String>();
 		for(byte[] hash : docSigsBytes) {
-			docSigsStrings.add(DeSignCore.bytesToHexString(hash));
+			docSigsStrings.add(BytesUtils.bytesToHexString(hash));
 		}
 		MerkleTree tree = new MerkleTree(docSigsStrings, hashAlgo);
 		return tree.getRoot().sig;

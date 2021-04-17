@@ -15,6 +15,7 @@ import org.web3j.utils.Convert;
 
 import contractWrappers.DeSign;
 import storage.DocumentVolumeStorage;
+import util.BytesUtils;
 
 public class DeSignCore {
 	private Web3j web3;
@@ -89,24 +90,13 @@ public class DeSignCore {
 	
 	public Boolean checkSignature(String index) throws Exception {
 		Tuple2<byte[], BigInteger> r = getIndexInfo(index);
-		System.out.println("found signature : " + bytesToHexString(r.component1()));
-		return (bytesToHexString(r.component1()).equals(bytesToHexString(storage.getIndexedDocumentVolumeMerkleRoot(index, hashAlgo))));
+		System.out.println("found signature : " + BytesUtils.bytesToHexString(r.component1()));
+		return (BytesUtils.bytesToHexString(r.component1()).equals(BytesUtils.bytesToHexString(storage.getIndexedDocumentVolumeMerkleRoot(index, hashAlgo))));
 	}
 	
 	
-	/*
-	 * 
-	 * Utility methods
-	 * 
-	 */
 	
-	public static String bytesToHexString(byte[] bytes){
-        StringBuilder sb = new StringBuilder();
-        for(byte b : bytes){
-            sb.append(String.format("%02x", b&0xff));
-        }
-        return sb.toString();
-    }
+	
 
 
 

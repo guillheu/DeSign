@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.DeSignCore;
+import util.BytesUtils;
 import util.MerkleTree;
 
 import java.sql.Statement;
@@ -36,7 +37,7 @@ public class SQLStorage extends DocumentVolumeStorage {
 
 	@Override
 	public byte[] getIndexedDocumentVolumeMerkleRoot(String index, MessageDigest hashAlgo) throws Exception {
-		String indexHash = DeSignCore.bytesToHexString(hashAlgo.digest(index.getBytes()));
+		String indexHash = BytesUtils.bytesToHexString(hashAlgo.digest(index.getBytes()));
 		Statement stmt = null;
 		ResultSet rs = null;
 		byte[] r = null;
@@ -50,7 +51,7 @@ public class SQLStorage extends DocumentVolumeStorage {
 
 			System.err.println("running the following query : \n" + query);
 			while(rs.next()) {
-				res.add(DeSignCore.bytesToHexString(hashAlgo.digest(rs.getBytes(dataColumnName))));
+				res.add(BytesUtils.bytesToHexString(hashAlgo.digest(rs.getBytes(dataColumnName))));
 			}
 			r = new MerkleTree(res, hashAlgo).getRoot().sig;
 		} catch (SQLException ex) {
