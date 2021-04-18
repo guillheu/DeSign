@@ -341,10 +341,15 @@ public class DeSign_test {
 		byte[] document = "This is document 1".getBytes();
 		byte[] current = sha256.digest(document);
 		SignatureProof sigProof = coreSQLDB.getSignatureProof(document, nodeURL);
+		System.out.println("current, before any hashing : " + BytesUtils.bytesToHexString(current));
 		for(byte[] step : sigProof.merklePath) {
+			System.out.println("step : "+BytesUtils.bytesToHexString(step));
+			System.out.println("Temporary concatenated hashes : " + BytesUtils.bytesToHexString(ArrayUtils.addAll(current, step)));
 			current = sha256.digest(ArrayUtils.addAll(current, step));
+			System.out.println("current, after hashing with step : " + BytesUtils.bytesToHexString(current));
 		}
 		String foundRoot = BytesUtils.bytesToHexString(current);
+		System.out.println(foundRoot);
 		try {
 			String expectedRoot = BytesUtils.bytesToHexString(coreSQLDB.getDocumentVolumeMerkleRoot(indexVolume1, sha256));
 			assertTrue(expectedRoot.equals(foundRoot));
