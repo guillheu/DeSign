@@ -3,10 +3,10 @@ package storage;
 import java.io.File;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-import core.DeSignCore;
 import util.BytesUtils;
 import util.MerkleTree;
 
@@ -41,6 +41,28 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 		}
 		MerkleTree tree = new MerkleTree(docSigsStrings, hashAlgo);
 		return tree.getRoot().sig;
+	}
+
+
+
+
+
+
+	@Override
+	public byte[] getIndexHash(byte[] document) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+
+
+
+	@Override
+	public List<byte[]> getMerklePath(byte[] document, MessageDigest hashAlgo) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

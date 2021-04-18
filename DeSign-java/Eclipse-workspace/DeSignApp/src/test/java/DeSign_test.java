@@ -16,12 +16,16 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 
+import contractWrappers.DeSign;
 import core.DeSignCore;
+import core.DeSignCore.SignatureProof;
 import storage.DocumentVolumeStorage;
 import storage.SQLStorage;
 import storage.TMPLocalFileStorage;
@@ -154,7 +158,7 @@ public class DeSign_test {
 				int daysBeforeExpiration;
 				System.out.println("What is the index ?");
 				index = console.readLine();
-				System.out.println("How many days before documents expiration ?");
+				System.out.println("How many seconds before documents expiration ?");
 				daysBeforeExpiration = Integer.parseInt(console.readLine());
 				
 				try {
@@ -330,9 +334,33 @@ public class DeSign_test {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		
+	}
+	
+	@Test
+	public void testGenerateSignatureProof() {
+		byte[] document = "This is document 1".getBytes();
+		byte[] current = sha256.digest(document);
+		SignatureProof sigProof = coreSQLDB.getSignatureProof(document, nodeURL);
+		for(byte[] step : sigProof.merklePath) {
+			current = sha256.digest(ArrayUtils.addAll(current, step));
+		}
+		String foundRoot = BytesUtils.bytesToHexString(current);
+		try {
+			String expectedRoot = BytesUtils.bytesToHexString(coreSQLDB.getDocumentVolumeMerkleRoot(indexVolume1, sha256));
+			assertTrue(expectedRoot.equals(foundRoot));
+			
+			//simulating outside check
+
+			Web3j clientWeb3 = Web3j.build(new HttpService(sigProof.nodeURL));
+			DeSign clientContract = DeSign.load(sigProof.contractAddress, clientWeb3, creds, gasProvider);
+			byte[] foundIndexHash = sigProof.indexHash;
+			Tuple2<byte[], BigInteger> output = clientContract.getIndexData(foundIndexHash).send();
+			System.out.println("");
+			assertTrue(BytesUtils.bytesToHexString(output.component1()).equals(foundRoot));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }

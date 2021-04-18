@@ -3,13 +3,13 @@ package core;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
-import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.utils.Convert;
 
@@ -118,5 +118,26 @@ public class DeSignCore {
 	public void setCredentials(Credentials newCreds) {
 		String currentAddress = contract.getContractAddress();
 		contract = DeSign.load(currentAddress, web3, newCreds, gasProvider);
+	}
+
+	public SignatureProof getSignatureProof(byte[] document, String nodeURL) {
+		SignatureProof r = new SignatureProof();
+		try {
+			r.merklePath = storage.getMerklePath(document, hashAlgo);
+			r.indexHash = storage.getIndexHash(document);
+			r.contractAddress = contract.getContractAddress();
+			r.nodeURL = nodeURL;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return r;
+	}
+	
+	public static class SignatureProof{
+		public List<byte[]> merklePath;
+		public byte[] indexHash;
+		public String contractAddress;
+		public String nodeURL;
 	}
 }

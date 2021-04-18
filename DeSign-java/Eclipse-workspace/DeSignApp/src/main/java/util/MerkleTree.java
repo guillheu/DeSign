@@ -3,14 +3,12 @@ package util;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.web3j.abi.datatypes.Bytes;
 
 /**
  * MerkleTree is an implementation of a Merkle binary hash tree where the leaves
