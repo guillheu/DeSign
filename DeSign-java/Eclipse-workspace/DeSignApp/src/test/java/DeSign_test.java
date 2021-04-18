@@ -4,8 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +15,16 @@ import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.bouncycastle.pqc.math.linearalgebra.ByteUtils;
 import org.junit.Test;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
-import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
+
+import com.google.gson.Gson;
 
 import contractWrappers.DeSign;
 import core.DeSignCore;
@@ -56,6 +59,7 @@ public class DeSign_test {
 	static String SQLVolumeIDColumnName;
 	static String SQLDataColumnName;
 	static String localStorageRoot;
+	static String externalNodeURL;
 	
 	
 	
@@ -109,6 +113,7 @@ public class DeSign_test {
 			SQLVolumeIDColumnName = 	config.getString("storage.SQLVolumeIDColumnName");
 			SQLDataColumnName = 		config.getString("storage.SQLDataColumnName");
 			localStorageRoot = 			config.getString("storage.localStorageRoot");
+			externalNodeURL = 			config.getString("blockchain.nodeURLForExternalChecks");
 			
 			
 			
@@ -138,14 +143,15 @@ public class DeSign_test {
 		BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 		int action = 0;
 		try {
-			while(action != 1 && action != 2) {
+			while(action != 1 && action != 2 && action != 3) {
 				System.out.println("Welcome to DeSign\n\n"
 						+ "node URL : " + nodeURL + "\n"
 						+ "contract address : " + addr + "\n"
 						+ "SQL database connexion link : " + localDBConnectionLink + "\n\n"
 						+ "What do you want to do ?\n"
 						+ "1) Sign a document volume\n"
-						+ "2) Check a stored signature"
+						+ "2) Check a stored signature\n"
+						+ "3) Export a document's signature proof"
 						);
 				try {
 					action = Integer.parseInt(console.readLine());
@@ -183,6 +189,19 @@ public class DeSign_test {
 					System.err.println("Something went wrong");
 					e.printStackTrace();
 				}
+			}
+			else if(action == 3) {
+				String documentPath;
+				String documentName;
+				System.out.println("What is the path to the folder of the document ?");
+				documentPath = console.readLine();
+				System.out.println("What is the name of the document ?");
+				documentName = console.readLine();
+				byte[] document = FileUtils.readFileToByteArray(new File(documentPath+documentName));
+				SignatureProof sigProof = coreSQLDB.getSignatureProof(document, nodeURL);
+				Gson gson = new Gson();
+				String json = gson.toJson(sigProof);
+				Files.writeString(Paths.get(documentPath + "sigProof.json"), json, StandardCharsets.UTF_8);
 			}
 		}
 		catch(Exception e) {
@@ -342,10 +361,11 @@ public class DeSign_test {
 		byte[] current = sha256.digest(document);
 		SignatureProof sigProof = coreSQLDB.getSignatureProof(document, nodeURL);
 		System.out.println("current, before any hashing : " + BytesUtils.bytesToHexString(current));
-		for(byte[] step : sigProof.merklePath) {
-			System.out.println("step : "+BytesUtils.bytesToHexString(step));
-			System.out.println("Temporary concatenated hashes : " + BytesUtils.bytesToHexString(ArrayUtils.addAll(current, step)));
-			current = sha256.digest(ArrayUtils.addAll(current, step));
+		for(String step : sigProof.merklePath) {
+			byte[] byteStep = BytesUtils.hexStringToByteArray(step);
+			System.out.println("step : "+step);
+			System.out.println("Temporary concatenated hashes : " + BytesUtils.bytesToHexString(ArrayUtils.addAll(current, byteStep)));
+			current = sha256.digest(ArrayUtils.addAll(current, byteStep));
 			System.out.println("current, after hashing with step : " + BytesUtils.bytesToHexString(current));
 		}
 		String foundRoot = BytesUtils.bytesToHexString(current);
@@ -357,10 +377,11 @@ public class DeSign_test {
 			//simulating outside check
 
 			Web3j clientWeb3 = Web3j.build(new HttpService(sigProof.nodeURL));
-			DeSign clientContract = DeSign.load(sigProof.contractAddress, clientWeb3, creds, gasProvider);
-			byte[] foundIndexHash = sigProof.indexHash;
+			DeSign clientContract = DeSign.load(sigProof.contractAddr, clientWeb3, creds, gasProvider);
+			byte[] foundIndexHash = BytesUtils.hexStringToByteArray(sigProof.indexHash);
 			Tuple2<byte[], BigInteger> output = clientContract.getIndexData(foundIndexHash).send();
-			System.out.println("");
+			System.out.println("found on signature : " + foundRoot);
+			System.out.println("found on chain : " + BytesUtils.bytesToHexString(output.component1()));
 			assertTrue(BytesUtils.bytesToHexString(output.component1()).equals(foundRoot));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

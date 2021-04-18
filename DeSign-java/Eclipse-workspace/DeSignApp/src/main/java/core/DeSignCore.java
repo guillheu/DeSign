@@ -3,6 +3,7 @@ package core;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.web3j.crypto.Credentials;
@@ -122,10 +123,13 @@ public class DeSignCore {
 
 	public SignatureProof getSignatureProof(byte[] document, String nodeURL) {
 		SignatureProof r = new SignatureProof();
+		
 		try {
-			r.merklePath = storage.getMerklePath(document, hashAlgo);
-			r.indexHash = storage.getIndexHash(document);
-			r.contractAddress = contract.getContractAddress();
+			for(byte[] step : storage.getMerklePath(document, hashAlgo)) {
+				r.merklePath.add("0x"+BytesUtils.bytesToHexString(step));
+			}
+			r.indexHash = "0x"+BytesUtils.bytesToHexString(storage.getIndexHash(document));
+			r.contractAddr = contract.getContractAddress();
 			r.nodeURL = nodeURL;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -135,9 +139,9 @@ public class DeSignCore {
 	}
 	
 	public static class SignatureProof{
-		public List<byte[]> merklePath;
-		public byte[] indexHash;
-		public String contractAddress;
+		public List<String> merklePath = new ArrayList<String>();
+		public String indexHash;
+		public String contractAddr;
 		public String nodeURL;
 	}
 }
