@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Queue;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.web3j.abi.datatypes.Bytes;
 
 /**
  * MerkleTree is an implementation of a Merkle binary hash tree where the leaves
@@ -42,9 +43,11 @@ public class MerkleTree {
   public static final int LONG_BYTES = 8;
   public static final byte LEAF_SIG_TYPE = 0x0;
   public static final byte INTERNAL_SIG_TYPE = 0x01;
+  public static final byte ROOT_SIG_TYPE = 0x02;
   
 	
   private List<String> leafSigs;
+  private List<Node> leafNodes = new ArrayList<Node>();
   private Node root;
   private int depth;
   private int nnodes;
@@ -162,6 +165,7 @@ public class MerkleTree {
     }
     
     root = parents.get(0);
+    root.type = ROOT_SIG_TYPE;
   }
 
   
@@ -214,6 +218,8 @@ public class MerkleTree {
       Node leaf2 = constructLeafNode(signatures.get(i+1));
       
       Node parent = constructInternalNode(leaf1, leaf2);
+      leafNodes.add(leaf1);
+      leafNodes.add(leaf2);
       parents.add(parent);
     }
     
@@ -221,6 +227,7 @@ public class MerkleTree {
     if (signatures.size() % 2 != 0) {
       Node leaf = constructLeafNode(signatures.get(signatures.size() - 1));      
       Node parent = constructInternalNode(leaf, null);
+      leafNodes.add(leaf);
       parents.add(parent);
     }
     
@@ -233,8 +240,11 @@ public class MerkleTree {
     
     if (child2 == null) {
       parent.sig = child1.sig;
+      child1.parent = parent;
     } else {
       parent.sig = internalHash(child1.sig, child2.sig);
+      child1.parent = parent;
+      child2.parent = parent;
     }
     
     parent.left = child1;
@@ -245,7 +255,7 @@ public class MerkleTree {
   private static Node constructLeafNode(String signature) {
     Node leaf = new Node();
     leaf.type = LEAF_SIG_TYPE;
-    leaf.sig = signature.getBytes(StandardCharsets.UTF_8);
+    leaf.sig = BytesUtils.hexStringToByteArray(signature);
     return leaf;
   }
   
@@ -266,13 +276,43 @@ public class MerkleTree {
    * Leaf Nodes will have no children (left = right = null).
    */
   public static class Node {
-    public byte type;  // INTERNAL_SIG_TYPE or LEAF_SIG_TYPE
+    public byte type;  // INTERNAL_SIG_TYPE or LEAF_SIG_TYPE or ROOT_SIG_TYPE
     public byte[] sig; // signature of the node
     public Node left;
     public Node right;
+    public Node parent;
     
 
-  }  
+  }
+
+
+public List<String> getMerklePath(String leafSig) throws Exception {
+	List<String> r = new ArrayList<String>();
+	Node current;
+	Node parent;
+	Node brother;
+	int index = leafSigs.indexOf(leafSig);
+	current = leafNodes.get(index);
+	while(current.type != ROOT_SIG_TYPE) {
+		parent = current.parent;
+		String parentLeftSig = BytesUtils.bytesToHexString(parent.left.sig);
+		String parentRightSig = BytesUtils.bytesToHexString(parent.right.sig);
+		String currentSig = BytesUtils.bytesToHexString(current.sig);
+		if(parentLeftSig.equals(currentSig)) {
+			brother = parent.right;
+		}
+		else if(parentRightSig.equals(currentSig)) {
+			brother = parent.left;
+		}
+		else {
+			throw new Exception("Unknown error ; current sig not referenced by it's parent");
+		}
+		r.add(BytesUtils.bytesToHexString(brother.sig));
+		current = parent;
+	}
+	return r;
+}  
+
 
 
 }

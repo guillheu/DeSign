@@ -4,11 +4,16 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.web3j.crypto.Credentials;
 import org.web3j.tuples.generated.Tuple2;
@@ -21,6 +26,7 @@ import storage.DocumentVolumeStorage;
 import storage.SQLStorage;
 import storage.TMPLocalFileStorage;
 import util.BytesUtils;
+import util.MerkleTree;
 
 public class DeSign_test {
 	static Configuration config;
@@ -75,6 +81,7 @@ public class DeSign_test {
 	static String linkDBVolume1;
 	static String linkDBVolume2;
 	static byte[] dataHash;
+	static int amountOfLeaves = 7;
 
 	
 	
@@ -178,6 +185,7 @@ public class DeSign_test {
 			e.printStackTrace();
 		}
 	}
+
 	
 	
 	@Test
@@ -211,6 +219,9 @@ public class DeSign_test {
 			System.out.println("volume1 root : " +  BytesUtils.bytesToHexString(localStorage.getIndexedDocumentVolumeMerkleRoot(indexVolume1, sha256)) + "\n" + 
 			"volume2 root : " + BytesUtils.bytesToHexString(localStorage.getIndexedDocumentVolumeMerkleRoot(indexVolume2, sha256)));
 			assertNotEquals(BytesUtils.bytesToHexString(localStorage.getIndexedDocumentVolumeMerkleRoot(indexVolume1, sha256)), BytesUtils.bytesToHexString(localStorage.getIndexedDocumentVolumeMerkleRoot(indexVolume2, sha256)));
+			
+			
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -288,6 +299,40 @@ public class DeSign_test {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	@Test
+	public void testMerklePathGenerator() {
+		List<String> sigs = new ArrayList<String>();
+		System.out.println("\nleaves : ");
+		for(int i = 0; i < amountOfLeaves; i++ ) {
+			String hash = BytesUtils.bytesToHexString(sha256.digest(("" + i).getBytes()));
+			sigs.add(hash);
+			System.out.println(hash);
+		}
+		
+		
+		try {
+			MerkleTree merkleTree = new MerkleTree(sigs, sha256);
+			System.out.println("\nroot : " + BytesUtils.bytesToHexString(merkleTree.getRoot().sig));
+			List<String> merklePath;
+			merklePath = merkleTree.getMerklePath(sigs.get(0));
+			assertTrue(sigs.get(1).equals(merklePath.get(0)));
+			String sigs2and3hashed = BytesUtils.bytesToHexString(sha256.digest(ArrayUtils.addAll(sha256.digest((""+2).getBytes()) , sha256.digest((""+3).getBytes()))));
+			System.out.println(sigs2and3hashed + " should equal " + merklePath.get(1));
+			assertTrue(sigs2and3hashed.equals(merklePath.get(1)));
+			String current = sigs.get(0);
+			for(String step : merklePath) {
+				current = BytesUtils.bytesToHexString(sha256.digest(ArrayUtils.addAll(BytesUtils.hexStringToByteArray(current), BytesUtils.hexStringToByteArray(step))));
+			}
+			assertTrue(BytesUtils.bytesToHexString(merkleTree.getRoot().sig).equals(current));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
 	}
 	
 }
