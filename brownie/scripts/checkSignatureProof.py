@@ -4,13 +4,13 @@ from hashlib import sha256
 from brownie.convert import to_bytes
 
 def main():
-	documentFilePath = "/home/old/dante/Documents/DeSign/DeSign/document1" #input("document file path : ")
+	documentFilePath = input("document file path : ")
 	documentFile = open(documentFilePath, "rb")
 	document = documentFile.read()
 	documentHash = sha256(document).digest()
 	documentFile.close()
 
-	jsonFilePath = "/home/old/dante/Documents/DeSign/DeSign/testSignatureProof.json"#input("sigProof.json file path : ")
+	jsonFilePath = input("sigProof.json file path : ")
 	jsonData = json.load(open(jsonFilePath))
 	currentStep = documentHash
 	for hash in jsonData["merklePath"]:
