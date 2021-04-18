@@ -13,11 +13,19 @@ def main():
 	jsonFilePath = input("sigProof.json file path : ")
 	jsonData = json.load(open(jsonFilePath))
 	currentStep = documentHash
-	for hash in jsonData["merklePath"]:
+	for step in jsonData["merklePath"]:
+		hash = step["hashWith"]
 		hashBytes = bytes.fromhex(hash[2:])
-		currentStep = sha256(currentStep + hashBytes).digest()
+		if(step["hashFrom"] == "LEFT"):
+			currentStep = sha256(currentStep + hashBytes).digest()
+		elif(step["hashFrom"] == "RIGHT"):
+			currentStep = sha256(hashBytes + currentStep).digest()
+		else:
+			raise Exception("Invalid merkle path : unknown value for hashFrom : \"" + step["hashFrom"] + "\"")
 
 	contract = DeSign.at(jsonData["contractAddr"])
 	r = contract.getIndexData(to_bytes(jsonData["indexHash"]))
-	print("Computed merkle root : " + currentStep.hex())
-	print("Signed merkle root : " + r[0].hex())
+	print("Computed merkle root : \t" + currentStep.hex())
+	print("Signed merkle root : \t" + r[0].hex())
+	if(currentStep.hex() == r[0].hex()):
+		print("This document was properly signed!")

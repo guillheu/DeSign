@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
+import kotlin.Pair;
 import util.BytesUtils;
 import util.MerkleTree;
 
@@ -60,7 +61,7 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 
 
 	@Override
-	public List<byte[]> getMerklePath(byte[] document, MessageDigest hashAlgo) {
+	public List<Pair<String, String>> getMerklePath(byte[] document, MessageDigest hashAlgo) {
 		// TODO Auto-generated method stub
 		return null;
 	}

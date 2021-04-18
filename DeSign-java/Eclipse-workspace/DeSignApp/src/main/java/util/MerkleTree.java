@@ -10,6 +10,8 @@ import java.util.Queue;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import kotlin.Pair;
+
 /**
  * MerkleTree is an implementation of a Merkle binary hash tree where the leaves
  * are signatures (hashes, digests, CRCs, etc.) of some underlying data structure
@@ -284,11 +286,12 @@ public class MerkleTree {
   }
 
 
-public List<String> getMerklePath(String leafSig) throws Exception {
-	List<String> r = new ArrayList<String>();
+public List<Pair<String, String>> getMerklePath(String leafSig) throws Exception {
+	List<Pair<String, String>> r = new ArrayList<Pair<String,String>>();
 	Node current;
 	Node parent;
 	Node brother;
+	String fromSide;
 	int index = leafSigs.indexOf(leafSig);
 	current = leafNodes.get(index);
 	while(current.type != ROOT_SIG_TYPE) {
@@ -298,14 +301,16 @@ public List<String> getMerklePath(String leafSig) throws Exception {
 		String currentSig = BytesUtils.bytesToHexString(current.sig);
 		if(parentLeftSig.equals(currentSig)) {
 			brother = parent.right;
+			fromSide = "LEFT";
 		}
 		else if(parentRightSig.equals(currentSig)) {
 			brother = parent.left;
+			fromSide = "RIGHT";
 		}
 		else {
 			throw new Exception("Unknown error ; current sig not referenced by it's parent");
 		}
-		r.add(BytesUtils.bytesToHexString(brother.sig));
+		r.add(new Pair<String, String>(fromSide, BytesUtils.bytesToHexString(brother.sig)));
 		current = parent;
 	}
 	return r;

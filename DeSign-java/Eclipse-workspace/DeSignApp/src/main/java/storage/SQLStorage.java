@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import kotlin.Pair;
 import util.BytesUtils;
 import util.MerkleTree;
 
@@ -41,14 +42,9 @@ public class SQLStorage extends DocumentVolumeStorage {
 	}
 
 	@Override
-	public List<byte[]> getMerklePath(byte[] document, MessageDigest hashAlgo) throws Exception {
+	public List<Pair<String, String>> getMerklePath(byte[] document, MessageDigest hashAlgo) throws Exception {
 		String indexHash = getDocumentIndex(document);
-		List<String> path = getIndexedVolumeMerkleTree(indexHash, hashAlgo).getMerklePath(BytesUtils.bytesToHexString(hashAlgo.digest(document)));
-		List<byte[]> bytePath = new ArrayList<byte[]>();
-		for(String step : path) {
-			bytePath.add(BytesUtils.hexStringToByteArray(step));
-		}
-		return bytePath;
+		return getIndexedVolumeMerkleTree(indexHash, hashAlgo).getMerklePath(BytesUtils.bytesToHexString(hashAlgo.digest(document)));
 	}
 
 	@Override

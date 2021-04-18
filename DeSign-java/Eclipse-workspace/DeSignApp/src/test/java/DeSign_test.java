@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 import contractWrappers.DeSign;
 import core.DeSignCore;
 import core.DeSignCore.SignatureProof;
+import kotlin.Pair;
 import storage.DocumentVolumeStorage;
 import storage.SQLStorage;
 import storage.TMPLocalFileStorage;
@@ -201,6 +202,8 @@ public class DeSign_test {
 				SignatureProof sigProof = coreSQLDB.getSignatureProof(document, nodeURL);
 				Gson gson = new Gson();
 				String json = gson.toJson(sigProof);
+				json = json.replace("first", "hashFrom");
+				json = json.replace("second", "hashWith");
 				Files.writeString(Paths.get(documentPath + "sigProof.json"), json, StandardCharsets.UTF_8);
 			}
 		}
@@ -217,14 +220,9 @@ public class DeSign_test {
 				"send expiration time = " + defaultValidityTime);
 		
 			try {
-				coreLocalStorage.signMerkleRoot(sha256.digest(indexVolume1.getBytes()),dataHash, defaultValidityTime);
-			} catch (Exception e) {
-				System.out.println("lol ??");
-				e.printStackTrace();
-			}
-
-			try {
-				Tuple2<byte[], BigInteger> r = coreLocalStorage.getIndexInfo(indexVolume1);
+				DeSignCore core = new DeSignCore(nodeURL, creds, gasProvider, localStorage, sha256);
+				core.signMerkleRoot(sha256.digest(indexVolume1.getBytes()),dataHash, defaultValidityTime);
+				Tuple2<byte[], BigInteger> r = core.getIndexInfo(indexVolume1);
 				System.out.println("received document hash = " + BytesUtils.bytesToHexString(r.component1()) + "\n" +
 						"received expiration time = " + r.component2().divide(BigInteger.valueOf(86400)));
 				
@@ -232,7 +230,8 @@ public class DeSign_test {
 				assertEquals(BytesUtils.bytesToHexString(r.component1()), BytesUtils.bytesToHexString(dataHash));
 				assertEquals(r.component2().intValue(), defaultValidityTime);
 			} catch (Exception e) {
-				//e.printStackTrace();
+				System.out.println("lol ??");
+				e.printStackTrace();
 			}
 	}
 	
@@ -338,15 +337,19 @@ public class DeSign_test {
 		try {
 			MerkleTree merkleTree = new MerkleTree(sigs, sha256);
 			System.out.println("\nroot : " + BytesUtils.bytesToHexString(merkleTree.getRoot().sig));
-			List<String> merklePath;
+			List<Pair<String, String>> merklePath;
 			merklePath = merkleTree.getMerklePath(sigs.get(0));
-			assertTrue(sigs.get(1).equals(merklePath.get(0)));
+			assertTrue(sigs.get(1).equals(merklePath.get(0).component2()));
 			String sigs2and3hashed = BytesUtils.bytesToHexString(sha256.digest(ArrayUtils.addAll(sha256.digest((""+2).getBytes()) , sha256.digest((""+3).getBytes()))));
 			System.out.println(sigs2and3hashed + " should equal " + merklePath.get(1));
-			assertTrue(sigs2and3hashed.equals(merklePath.get(1)));
+			assertTrue(sigs2and3hashed.equals(merklePath.get(1).component2()));
 			String current = sigs.get(0);
-			for(String step : merklePath) {
-				current = BytesUtils.bytesToHexString(sha256.digest(ArrayUtils.addAll(BytesUtils.hexStringToByteArray(current), BytesUtils.hexStringToByteArray(step))));
+			for(Pair<String, String> step : merklePath) {
+				if(step.getFirst().equals("LEFT"))
+					current = BytesUtils.bytesToHexString(sha256.digest(ArrayUtils.addAll(BytesUtils.hexStringToByteArray(current), BytesUtils.hexStringToByteArray(step.getSecond()))));
+				else if(step.getFirst().equals("RIGHT"))
+					current = BytesUtils.bytesToHexString(sha256.digest(ArrayUtils.addAll(BytesUtils.hexStringToByteArray(step.getSecond()), BytesUtils.hexStringToByteArray(current))));
+					
 			}
 			assertTrue(BytesUtils.bytesToHexString(merkleTree.getRoot().sig).equals(current));
 		} catch (Exception e) {
@@ -361,24 +364,33 @@ public class DeSign_test {
 		byte[] current = sha256.digest(document);
 		SignatureProof sigProof = coreSQLDB.getSignatureProof(document, nodeURL);
 		System.out.println("current, before any hashing : " + BytesUtils.bytesToHexString(current));
-		for(String step : sigProof.merklePath) {
-			byte[] byteStep = BytesUtils.hexStringToByteArray(step);
-			System.out.println("step : "+step);
-			System.out.println("Temporary concatenated hashes : " + BytesUtils.bytesToHexString(ArrayUtils.addAll(current, byteStep)));
-			current = sha256.digest(ArrayUtils.addAll(current, byteStep));
-			System.out.println("current, after hashing with step : " + BytesUtils.bytesToHexString(current));
-		}
-		String foundRoot = BytesUtils.bytesToHexString(current);
-		System.out.println(foundRoot);
+		
 		try {
+			for(Pair<String,String> step : sigProof.merklePath) {
+				byte[] byteStep = BytesUtils.hexStringToByteArray(step.getSecond().substring(2));
+				System.out.println("step : "+step);
+				byte[] concatHashes = null;
+				if(step.component1().equals("LEFT"))
+					concatHashes = ArrayUtils.addAll(current, byteStep);
+				else if(step.component1().equals("RIGHT"))
+					concatHashes = ArrayUtils.addAll(byteStep, current);
+				else
+					throw new Exception("Unknown merkle path step direction : " + step.component1());
+				System.out.println("Temporary concatenated hashes : " + BytesUtils.bytesToHexString(concatHashes));
+				current = sha256.digest(concatHashes);
+				System.out.println("current, after hashing with step : " + BytesUtils.bytesToHexString(current));
+			}
+			String foundRoot = BytesUtils.bytesToHexString(current);
 			String expectedRoot = BytesUtils.bytesToHexString(coreSQLDB.getDocumentVolumeMerkleRoot(indexVolume1, sha256));
+			System.out.println("Expected : " + expectedRoot);
+			System.out.println("Found : " + foundRoot);
 			assertTrue(expectedRoot.equals(foundRoot));
 			
 			//simulating outside check
 
 			Web3j clientWeb3 = Web3j.build(new HttpService(sigProof.nodeURL));
 			DeSign clientContract = DeSign.load(sigProof.contractAddr, clientWeb3, creds, gasProvider);
-			byte[] foundIndexHash = BytesUtils.hexStringToByteArray(sigProof.indexHash);
+			byte[] foundIndexHash = BytesUtils.hexStringToByteArray(sigProof.indexHash.substring(2));
 			Tuple2<byte[], BigInteger> output = clientContract.getIndexData(foundIndexHash).send();
 			System.out.println("found on signature : " + foundRoot);
 			System.out.println("found on chain : " + BytesUtils.bytesToHexString(output.component1()));

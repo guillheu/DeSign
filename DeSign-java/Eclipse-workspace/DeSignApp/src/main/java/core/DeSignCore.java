@@ -6,6 +6,8 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import kotlin.Pair;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -125,8 +127,9 @@ public class DeSignCore {
 		SignatureProof r = new SignatureProof();
 		
 		try {
-			for(byte[] step : storage.getMerklePath(document, hashAlgo)) {
-				r.merklePath.add("0x"+BytesUtils.bytesToHexString(step));
+			for(Pair<String,String> step : storage.getMerklePath(document, hashAlgo)) {
+				Pair<String,String> entry = new Pair<String,String>(step.component1(),"0x"+step.component2());
+				r.merklePath.add(entry);
 			}
 			r.indexHash = "0x"+BytesUtils.bytesToHexString(storage.getIndexHash(document));
 			r.contractAddr = contract.getContractAddress();
@@ -139,7 +142,7 @@ public class DeSignCore {
 	}
 	
 	public static class SignatureProof{
-		public List<String> merklePath = new ArrayList<String>();
+		public List<Pair<String,String>> merklePath = new ArrayList<Pair<String,String>>();
 		public String indexHash;
 		public String contractAddr;
 		public String nodeURL;
