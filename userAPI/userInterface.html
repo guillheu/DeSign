@@ -1,1 +1,156 @@
-This should contain javascript code that will check a document's signature proof.
+<!DOCTYPE html>
+<html>
+<body>
+
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+<script type="text/javascript">
+
+const abi = JSON.parse('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"role","type":"bytes32"},{"indexed":true,"internalType":"bytes32","name":"previousAdminRole","type":"bytes32"},{"indexed":true,"internalType":"bytes32","name":"newAdminRole","type":"bytes32"}],"name":"RoleAdminChanged","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"role","type":"bytes32"},{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":true,"internalType":"address","name":"sender","type":"address"}],"name":"RoleGranted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"role","type":"bytes32"},{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":true,"internalType":"address","name":"sender","type":"address"}],"name":"RoleRevoked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"indexHash","type":"bytes32"},{"components":[{"internalType":"bytes32","name":"_documentVolumeHash","type":"bytes32"},{"internalType":"uint256","name":"_expirationTimestamp","type":"uint256"},{"internalType":"address","name":"_signatory","type":"address"}],"indexed":true,"internalType":"struct DeSign.IndexEntry","name":"indexEntry","type":"tuple"}],"name":"SignedEntry","type":"event"},{"inputs":[],"name":"DEFAULT_ADMIN_ROLE","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"SIGNATORY_ROLE","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"_indexHash","type":"bytes32"}],"name":"getIndexData","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"role","type":"bytes32"}],"name":"getRoleAdmin","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"role","type":"bytes32"},{"internalType":"address","name":"account","type":"address"}],"name":"grantRole","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes32","name":"role","type":"bytes32"},{"internalType":"address","name":"account","type":"address"}],"name":"hasRole","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"role","type":"bytes32"},{"internalType":"address","name":"account","type":"address"}],"name":"renounceRole","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes32","name":"role","type":"bytes32"},{"internalType":"address","name":"account","type":"address"}],"name":"revokeRole","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes32","name":"_indexHash","type":"bytes32"},{"internalType":"bytes32","name":"documentVolumeHash","type":"bytes32"},{"internalType":"uint256","name":"_secondsBeforeExpiration","type":"uint256"}],"name":"signMerkleRoot","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"}]');
+var docContent;
+var sigProofContent;
+var web3;
+
+function buf2hex(buffer) { // buffer is an ArrayBuffer
+  return [...new Uint8Array(buffer)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
+/*function concatBuffers(buffer1, buffer2) {
+  var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
+  tmp.set(new Uint8Array(buffer1), 0);
+  tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
+  return tmp.buffer;
+}*/
+
+async function initWeb3(nodeURL){
+    ethEnabled = false;
+    if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        ethEnabled = true;
+    }
+    else{
+    	web3 = new Web3(nodeURL);
+        ethEnabled = true;
+    }
+    console.log("web3 initialized");
+}
+
+function concatBuffers(buffer1, buffer2) {
+  var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
+  tmp.set(new Uint8Array(buffer1), 0);
+  tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
+  return tmp.buffer;
+};
+
+function hexStringToBuffer(hexString) {
+    if (hexString.length % 2 !== 0) {
+        throw "Must have an even number of hex digits to convert to bytes";
+    }/* w w w.  jav  a2 s .  c o  m*/
+    var numBytes = hexString.length / 2;
+    var byteArray = new Uint8Array(numBytes);
+    for (var i=0; i<numBytes; i++) {
+        byteArray[i] = parseInt(hexString.substr(i*2, 2), 16);
+    }
+    return byteArray;
+}
+
+
+function onDocumentSelected(event){
+	var documentFile = event.target.files[0];
+	var reader = new FileReader();
+
+	reader.onload = function(event){
+		docContent = event.target.result;
+	};
+	reader.readAsArrayBuffer(documentFile);
+}
+
+function onSignatureSelected(event){
+	var signatureFile = event.target.files[0];
+	var reader = new FileReader();
+
+	reader.onload = function(event){
+		sigProofContent = event.target.result;
+	};
+	reader.readAsText(signatureFile);
+}
+
+async function runCheck(){
+	console.log(docContent.toString('utf8') + " : " + buf2hex(docContent));
+	console.log(sigProofContent);
+	var sigProofObject = JSON.parse(sigProofContent);
+	console.log(sigProofObject);
+	var documentHash = await crypto.subtle.digest(sigProofObject["hashAlgo"], docContent);
+	
+	console.log(buf2hex(documentHash));
+
+	var current = documentHash;
+	console.log("current : " + buf2hex(current))
+	console.log(current);
+
+	var concatBytes;
+	for(let i = 0; i < sigProofObject["merklePath"].length; i++){
+		step = sigProofObject["merklePath"][i];
+		console.log("CURRENT BUFFER : " + buf2hex(current));
+		console.log("CURRENT STEP : ");
+		console.log(step);
+		var hashWith = hexStringToBuffer(step["hashWith"].substring(2));
+		if(step["hashFrom"] == "LEFT"){
+			concatBytes = concatBuffers(current, hashWith);
+		}
+		else if(step["hashFrom"] == "RIGHT"){
+			concatBytes = concatBuffers(hashWith, current);
+			console.log(step["hashWith"] + " | " + buf2hex(hexStringToBuffer(step["hashWith"].substring(2))));
+		}
+		else {
+			throw "unknown merkle path direction " + step["hashFrom"];
+		}
+		console.log("CONCAT : ");
+		console.log(typeof concatBytes);
+		current = await crypto.subtle.digest(sigProofObject["hashAlgo"], concatBytes);
+	}
+	console.log(buf2hex(current));
+	document.getElementById("result").innerHTML += "<br>Computed merkle root : " + buf2hex(current) + "<br>" +
+		"sending query to the blockchain...<br>"+
+		"Connecting to node " + sigProofObject["nodeURL"];
+
+	await initWeb3(sigProofObject["nodeURL"]);
+	document.getElementById("result").innerHTML += "<br>Sending call to DeSign contract at address " + sigProofObject["contractAddr"];
+	console.log(abi);
+	var contract = new web3.eth.Contract(abi, sigProofObject["contractAddr"]);
+	console.log(contract);
+	var r;
+	await contract.methods.getIndexData(sigProofObject["indexHash"]).call({}, function(error , result){
+			if(error){
+                 document.getElementById("result").innerHTML += "<br>there was an error calling the contract. Are these the right document and signature file ?";
+                 console.log(error.code);
+            }
+             else if(result != undefined){
+                //TODO : test this with smart contract that has a function which returns several things
+                document.getElementById("result").innerHTML += "<br>Successfully retreived data from the blockchain !";
+                r = result;
+                console.log(result);
+            }
+            else {
+            	console.log("fuck");
+            }
+        });
+    document.getElementById("result").innerHTML += "<br>Found Merkle root : " + r[0];
+    if(r[0].substring(2) == buf2hex(current)){
+    	document.getElementById("result").innerHTML += "<br><br><h3>Matches computed Merkle root ! The signature is valid!";
+    	document.getElementById("result").innerHTML += "<br>Signed by : address " + r[2] + " ; Valid for " + r[1]/86400 + " days</h3>";
+    }
+    else{
+    	document.getElementById("result").innerHTML += "<br><br><h3>The signature found did not match the document and signature proof file given.";
+    }
+
+}
+</script>
+Document file : <input type="file" id="documentFile" onchange="onDocumentSelected(event)"><br/><br/>
+Signature file : <input type="file" id="signatureFile" onchange="onSignatureSelected(event)"><br/>
+<button onclick="runCheck();">runCheck</button><br/>
+<p id="result"></p>
+
+</body>
+</html> 
+
