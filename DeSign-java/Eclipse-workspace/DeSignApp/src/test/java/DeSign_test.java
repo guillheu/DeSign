@@ -15,12 +15,12 @@ import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils;
 import org.junit.Test;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
+import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 
@@ -162,14 +162,14 @@ public class DeSign_test {
 			}
 			if(action == 1) {
 				String index;
-				int daysBeforeExpiration;
+				int secondsBeforeExpiration;
 				System.out.println("What is the index ?");
 				index = console.readLine();
-				System.out.println("How many seconds before documents expiration ?");
-				daysBeforeExpiration = Integer.parseInt(console.readLine());
+				System.out.println("How many days before documents expiration ?");
+				secondsBeforeExpiration = Integer.parseInt(console.readLine())*86400;
 				
 				try {
-					coreSQLDB.sign(index, daysBeforeExpiration);
+					coreSQLDB.sign(index, secondsBeforeExpiration);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -222,7 +222,7 @@ public class DeSign_test {
 			try {
 				DeSignCore core = new DeSignCore(nodeURL, creds, gasProvider, localStorage, sha256);
 				core.signMerkleRoot(sha256.digest(indexVolume1.getBytes()),dataHash, defaultValidityTime);
-				Tuple2<byte[], BigInteger> r = core.getIndexInfo(indexVolume1);
+				Tuple3<byte[], BigInteger, String> r = core.getIndexInfo(indexVolume1);
 				System.out.println("received document hash = " + BytesUtils.bytesToHexString(r.component1()) + "\n" +
 						"received expiration time = " + r.component2().divide(BigInteger.valueOf(86400)));
 				
@@ -391,7 +391,7 @@ public class DeSign_test {
 			Web3j clientWeb3 = Web3j.build(new HttpService(sigProof.nodeURL));
 			DeSign clientContract = DeSign.load(sigProof.contractAddr, clientWeb3, creds, gasProvider);
 			byte[] foundIndexHash = BytesUtils.hexStringToByteArray(sigProof.indexHash.substring(2));
-			Tuple2<byte[], BigInteger> output = clientContract.getIndexData(foundIndexHash).send();
+			Tuple3<byte[], BigInteger, String> output = clientContract.getIndexData(foundIndexHash).send();
 			System.out.println("found on signature : " + foundRoot);
 			System.out.println("found on chain : " + BytesUtils.bytesToHexString(output.component1()));
 			assertTrue(BytesUtils.bytesToHexString(output.component1()).equals(foundRoot));

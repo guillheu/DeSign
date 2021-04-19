@@ -20,13 +20,14 @@ contract DeSign is AccessControl{
 /**
  * @notice Logs all signatures with the address of the signatory, the hashed index, and the rest of the data contained in {IndexEntry}
  */
-	event SignedEntry(address indexed signatory, bytes32 indexed indexHash, IndexEntry indexed indexEntry);
+	event SignedEntry(bytes32 indexed indexHash, IndexEntry indexed indexEntry);
 
     bytes32 public constant SIGNATORY_ROLE = keccak256("SIGNATORY_ROLE");
 
 	struct IndexEntry {
 		bytes32 _documentVolumeHash;
 		uint _expirationTimestamp;
+		address _signatory;
 	}
 
 	mapping (bytes32 => IndexEntry) private index;
@@ -62,8 +63,8 @@ contract DeSign is AccessControl{
  * @param _secondsBeforeExpiration The amount of seconds before the signature is considered invalid. This is to let users know that beyond the expiration date, the signatory is no longer committed to certifying the documents or even to keep them in their back-end storage.
  */
 	function signMerkleRoot(bytes32 _indexHash, bytes32 documentVolumeHash, uint _secondsBeforeExpiration) external onlySignatory {
-		index[_indexHash] = IndexEntry(documentVolumeHash, block.timestamp + _secondsBeforeExpiration);
-		emit SignedEntry(msg.sender, _indexHash, index[_indexHash]);
+		index[_indexHash] = IndexEntry(documentVolumeHash, block.timestamp + _secondsBeforeExpiration, msg.sender);
+		emit SignedEntry(_indexHash, index[_indexHash]);
 	}
 
 /**
@@ -73,8 +74,8 @@ contract DeSign is AccessControl{
  * @return The lifetime of the signature in seconds. If a negative value, the signature is no longer valid.
  */
 
-	function getIndexData(bytes32 _indexHash) external view returns (bytes32, uint){
+	function getIndexData(bytes32 _indexHash) external view returns (bytes32, uint, address){
 		IndexEntry memory entry = index[_indexHash];
-		return (entry._documentVolumeHash, entry._expirationTimestamp - block.timestamp);
+		return (entry._documentVolumeHash, entry._expirationTimestamp - block.timestamp, entry._signatory);
 	}
 }

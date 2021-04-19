@@ -12,7 +12,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.tuples.generated.Tuple2;
+import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.utils.Convert;
 
@@ -65,7 +65,7 @@ public class DeSignCore {
 	
 	
 
-	public Tuple2<byte[], BigInteger> getIndexInfo(String index) throws Exception {
+	public Tuple3<byte[], BigInteger, String> getIndexInfo(String index) throws Exception {
 		byte[] indexHash = hashAlgo.digest(index.getBytes());
 		return contract.getIndexData(indexHash).send();
 	}
@@ -92,8 +92,9 @@ public class DeSignCore {
 	}
 	
 	public Boolean checkSignature(String index) throws Exception {
-		Tuple2<byte[], BigInteger> r = getIndexInfo(index);
+		Tuple3<byte[], BigInteger, String> r = getIndexInfo(index);
 		System.out.println("found signature : " + BytesUtils.bytesToHexString(r.component1()));
+		System.out.println("signed by " + r.component3());
 		return (BytesUtils.bytesToHexString(r.component1()).equals(BytesUtils.bytesToHexString(storage.getIndexedDocumentVolumeMerkleRoot(index, hashAlgo))));
 	}
 	
@@ -134,6 +135,7 @@ public class DeSignCore {
 			r.indexHash = "0x"+BytesUtils.bytesToHexString(storage.getIndexHash(document));
 			r.contractAddr = contract.getContractAddress();
 			r.nodeURL = nodeURL;
+			r.hashAlgo = hashAlgo.getAlgorithm();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -146,5 +148,6 @@ public class DeSignCore {
 		public String indexHash;
 		public String contractAddr;
 		public String nodeURL;
+		public String hashAlgo;
 	}
 }

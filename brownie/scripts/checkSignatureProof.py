@@ -27,5 +27,8 @@ def main():
 	r = contract.getIndexData(to_bytes(jsonData["indexHash"]))
 	print("Computed merkle root : \t" + currentStep.hex())
 	print("Signed merkle root : \t" + r[0].hex())
+	lifetime = r[1] / 86400
+	signatory = r[2]
 	if(currentStep.hex() == r[0].hex()):
 		print("This document was properly signed!")
+		print("Signed by address " + signatory + "; valid for " + str(lifetime) + " days")
