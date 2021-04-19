@@ -150,4 +150,8 @@ public class DeSignCore {
 		public String nodeURL;
 		public String hashAlgo;
 	}
+
+	public void indexDocumentIntoStorage(byte[] document, String index) {
+		storage.importDocument(document, index, hashAlgo);
+	}
 }

@@ -69,6 +69,17 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 
 
 
+
+
+	@Override
+	public void importDocument(byte[] document, String index, MessageDigest hashAlgo) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+
 	
 	
 	

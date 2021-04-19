@@ -61,6 +61,7 @@ public class DeSign_test {
 	static String SQLDataColumnName;
 	static String localStorageRoot;
 	static String externalNodeURL;
+	static String defaultFilePath;
 	
 	
 	
@@ -115,6 +116,7 @@ public class DeSign_test {
 			SQLDataColumnName = 		config.getString("storage.SQLDataColumnName");
 			localStorageRoot = 			config.getString("storage.localStorageRoot");
 			externalNodeURL = 			config.getString("blockchain.nodeURLForExternalChecks");
+			defaultFilePath = 			config.getString("documents.defaultPath");
 			
 			
 			
@@ -144,7 +146,7 @@ public class DeSign_test {
 		BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 		int action = 0;
 		try {
-			while(action != 1 && action != 2 && action != 3) {
+			while(action != 1 && action != 2 && action != 3 && action != 4) {
 				System.out.println("Welcome to DeSign\n\n"
 						+ "node URL : " + nodeURL + "\n"
 						+ "contract address : " + addr + "\n"
@@ -152,7 +154,8 @@ public class DeSign_test {
 						+ "What do you want to do ?\n"
 						+ "1) Sign a document volume\n"
 						+ "2) Check a stored signature\n"
-						+ "3) Export a document's signature proof"
+						+ "3) Export a document's signature proof\n"
+						+ "4) Index a document into the SQL database"
 						);
 				try {
 					action = Integer.parseInt(console.readLine());
@@ -194,8 +197,8 @@ public class DeSign_test {
 			else if(action == 3) {
 				String documentPath;
 				String documentName;
-				System.out.println("What is the path to the folder of the document ?");
-				documentPath = console.readLine();
+				System.out.println("Using default path " + defaultFilePath);
+				documentPath = defaultFilePath;
 				System.out.println("What is the name of the document ?");
 				documentName = console.readLine();
 				byte[] document = FileUtils.readFileToByteArray(new File(documentPath+documentName));
@@ -205,6 +208,18 @@ public class DeSign_test {
 				json = json.replace("first", "hashFrom");
 				json = json.replace("second", "hashWith");
 				Files.writeString(Paths.get(documentPath + "sigProof.json"), json, StandardCharsets.UTF_8);
+			}
+			else if(action == 4) {
+				String documentName;
+				String documentPath = defaultFilePath;
+				String index;
+				System.out.println("What is the index ?");
+				index = console.readLine();
+				System.out.println("Using default path " + defaultFilePath);
+				System.out.println("What is the name of the document ?");
+				documentName = console.readLine();
+				byte[] document = FileUtils.readFileToByteArray(new File(documentPath + documentName));
+				coreSQLDB.indexDocumentIntoStorage(document, index);
 			}
 		}
 		catch(Exception e) {

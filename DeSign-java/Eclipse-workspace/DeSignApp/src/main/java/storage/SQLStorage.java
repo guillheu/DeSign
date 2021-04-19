@@ -136,4 +136,35 @@ public class SQLStorage extends DocumentVolumeStorage {
 		return indexHash;
 	}
 
+	@Override
+	public void importDocument(byte[] document, String index, MessageDigest hashAlgo) {
+		Statement stmt = null;
+		int rs;
+		
+		String query = "INSERT INTO " + DBName + "." + tableName + " (" + indexHashColumnName + "," + dataColumnName + ") VALUES (" + "0x" + BytesUtils.bytesToHexString(hashAlgo.digest(index.getBytes())) + ", 0x" + BytesUtils.bytesToHexString(document) + ");";
+		
+		try {
+			stmt = SQLConnection.createStatement();
+			rs = stmt.executeUpdate(query);
+
+			System.err.println("running the following query : \n" + query);
+		} catch (SQLException ex) {
+		    // handle any errors
+			System.err.println("Attempted query : " + query);
+		    System.err.println("SQLException: " + ex.getMessage());
+		    System.err.println("SQLState: " + ex.getSQLState());
+		    System.err.println("VendorError: " + ex.getErrorCode());
+		    ex.printStackTrace();
+		}
+		finally {
+		    
+		    if (stmt != null) {
+		        try {
+		            stmt.close();
+		        } catch (SQLException sqlEx) { } // ignore
+		        stmt = null;
+		    }
+		}
+	}
+
 }
