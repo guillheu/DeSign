@@ -323,7 +323,7 @@ public class DeSign_test {
 		
 	}
 	
-	@Test
+	/*@Test
 	public void testMySQLStorage() {
 		DocumentVolumeStorage testStorage = new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName);
 		try {
@@ -336,7 +336,7 @@ public class DeSign_test {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+	}*/
 	
 	@Test
 	public void testMerklePathGenerator() {
@@ -415,5 +415,6 @@ public class DeSign_test {
 			e.printStackTrace();
 		}
 	}
+	
 	
 }
