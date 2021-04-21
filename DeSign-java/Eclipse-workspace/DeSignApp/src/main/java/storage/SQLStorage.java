@@ -139,13 +139,12 @@ public class SQLStorage extends DocumentVolumeStorage {
 	@Override
 	public void importDocument(byte[] document, String index, MessageDigest hashAlgo) {
 		Statement stmt = null;
-		int rs;
 		
 		String query = "INSERT INTO " + DBName + "." + tableName + " (" + indexHashColumnName + "," + dataColumnName + ") VALUES (" + "0x" + BytesUtils.bytesToHexString(hashAlgo.digest(index.getBytes())) + ", 0x" + BytesUtils.bytesToHexString(document) + ");";
 		
 		try {
 			stmt = SQLConnection.createStatement();
-			rs = stmt.executeUpdate(query);
+			stmt.executeUpdate(query);
 
 			System.err.println("running the following query : \n" + query);
 		} catch (SQLException ex) {

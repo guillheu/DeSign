@@ -11,5 +11,6 @@ storage.SQLTableName =
 storage.SQLVolumeIDColumnName = 
 storage.SQLDataColumnName = 
 storage.localStorageRoot = 
+storage.SQLDriver = 
 documents.defaultValiditytime = 86400
 documents.defaultPath = 

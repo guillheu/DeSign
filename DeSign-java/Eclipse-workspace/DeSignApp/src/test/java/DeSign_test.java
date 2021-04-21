@@ -1,12 +1,7 @@
 import static org.junit.Assert.*;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +14,9 @@ import org.junit.Test;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
-
-import com.google.gson.Gson;
 
 import contractWrappers.DeSign;
 import core.DeSignCore;
@@ -62,6 +54,7 @@ public class DeSign_test {
 	static String localStorageRoot;
 	static String externalNodeURL;
 	static String defaultFilePath;
+	static String sqlDriverClassName;
 	
 	
 	
@@ -93,6 +86,7 @@ public class DeSign_test {
 	static byte[] dataHash;
 	static int amountOfLeaves = 7;
 
+
 	
 	
 	
@@ -117,11 +111,15 @@ public class DeSign_test {
 			localStorageRoot = 			config.getString("storage.localStorageRoot");
 			externalNodeURL = 			config.getString("blockchain.nodeURLForExternalChecks");
 			defaultFilePath = 			config.getString("documents.defaultPath");
+			sqlDriverClassName = 		config.getString("storage.SQLDriver");
+			
+			
+			
 			
 			
 			
 
-			Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
+			Class.forName(sqlDriverClassName).getDeclaredConstructor().newInstance();
 			gasProvider = new StaticGasProvider(gasPrice, gasLimit);
 			creds = Credentials.create(privateKey);
 			sha256 = MessageDigest.getInstance(hashAlgo);
@@ -137,97 +135,6 @@ public class DeSign_test {
 			e.printStackTrace();
 		}
 	}
-	
-
-	
-	
-
-	public static void main(String args[]) {
-		BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
-		int action = 0;
-		try {
-			while(action != 1 && action != 2 && action != 3 && action != 4) {
-				System.out.println("Welcome to DeSign\n\n"
-						+ "node URL : " + nodeURL + "\n"
-						+ "contract address : " + addr + "\n"
-						+ "SQL database connexion link : " + localDBConnectionLink + "\n\n"
-						+ "What do you want to do ?\n"
-						+ "1) Sign a document volume\n"
-						+ "2) Check a stored signature\n"
-						+ "3) Export a document's signature proof\n"
-						+ "4) Index a document into the SQL database\n"
-						);
-				try {
-					action = Integer.parseInt(console.readLine());
-				} catch (Exception e) {
-					System.err.println("please enter a valid number");
-				}
-			}
-			if(action == 1) {
-				String index;
-				int secondsBeforeExpiration;
-				System.out.println("What is the index ?");
-				index = console.readLine();
-				System.out.println("How many days before documents expiration ?");
-				secondsBeforeExpiration = Integer.parseInt(console.readLine())*86400;
-				
-				try {
-					coreSQLDB.sign(index, secondsBeforeExpiration);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			else if(action == 2) {
-				String index;
-				System.out.println("What is the index to check ?");
-				index = console.readLine();
-				try {
-					if(coreSQLDB.checkSignature(index)) {
-						System.out.println("Signature matched documents !");
-					}
-					else {
-						System.out.println("Signatures did not match");
-					}
-				} catch (Exception e) {
-					System.err.println("Something went wrong");
-					e.printStackTrace();
-				}
-			}
-			else if(action == 3) {
-				String documentPath;
-				String documentName;
-				System.out.println("Using default path " + defaultFilePath);
-				documentPath = defaultFilePath;
-				System.out.println("What is the name of the document ?");
-				documentName = console.readLine();
-				byte[] document = FileUtils.readFileToByteArray(new File(documentPath+documentName));
-				SignatureProof sigProof = coreSQLDB.getSignatureProof(document, nodeURL);
-				Gson gson = new Gson();
-				String json = gson.toJson(sigProof);
-				json = json.replace("first", "hashFrom");
-				json = json.replace("second", "hashWith");
-				Files.writeString(Paths.get(documentPath + "sigProof.json"), json, StandardCharsets.UTF_8);
-			}
-			else if(action == 4) {
-				String documentName;
-				String documentPath = defaultFilePath;
-				String index;
-				System.out.println("What is the index ?");
-				index = console.readLine();
-				System.out.println("Using default path " + defaultFilePath);
-				System.out.println("What is the name of the document ?");
-				documentName = console.readLine();
-				byte[] document = FileUtils.readFileToByteArray(new File(documentPath + documentName));
-				coreSQLDB.indexDocumentIntoStorage(document, index);
-			}
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	
 	
 	@Test
 	public void testIndexation() {		
@@ -323,7 +230,7 @@ public class DeSign_test {
 		
 	}
 	
-	@Test
+	/*@Test
 	public void testMySQLStorage() {
 		DocumentVolumeStorage testStorage = new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName);
 		try {
@@ -336,7 +243,7 @@ public class DeSign_test {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+	}*/
 	
 	@Test
 	public void testMerklePathGenerator() {
