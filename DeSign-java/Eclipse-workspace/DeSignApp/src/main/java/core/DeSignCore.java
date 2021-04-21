@@ -8,20 +8,15 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import kotlin.Pair;
-
-import org.bouncycastle.pqc.math.linearalgebra.ByteUtils;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.utils.Convert;
 
 import contractWrappers.DeSign;
-import contractWrappers.DeSign.SignedEntryEventResponse;
-import io.reactivex.Flowable;
 import storage.DocumentVolumeStorage;
 import util.BytesUtils;
 
@@ -159,8 +154,4 @@ public class DeSignCore {
 	public void indexDocumentIntoStorage(byte[] document, String index) {
 		storage.importDocument(document, index, hashAlgo);
 	}
-
-	
-
-	
 }
