@@ -57,7 +57,9 @@ def testsignMerkleRoot(DeSignContract):
 	###################################
 	####test signMerkleRoot events ####
 	###################################
-	"""events = signingTransaction.events
-	print(events)
-	//!\\BROWNIE HAS A KNOWN BUG WHICH PREVENTS THE USE OF EVENTS THAT CONTAIN STRUCTURES"""
-
+	events = signingTransaction.events
+	print("HERE COMES THE EVENT : ")
+	print(events['SignedEntry']["indexHash"])
+	assert events['SignedEntry']["indexHash"] == "0x" + indexHash.hex()
+	assert events['SignedEntry']["_documentVolumeHash"] == "0x" + merkleRoot.hex()
+	assert events['SignedEntry']["_signatory"] == owner
