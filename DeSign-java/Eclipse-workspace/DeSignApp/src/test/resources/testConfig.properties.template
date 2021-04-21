@@ -1,0 +1,15 @@
+crypto.hashAlgo = SHA-256
+blockchain.privKey = 
+blockchain.contractAddr = 
+blockchain.nodeURL = 
+blockchain.nodeURLForExternalChecks = 
+blockchain.gasPrice = 4100000000
+blockchain.gasLimit = 12000000
+storage.SQLconnexionLink = 
+storage.SQLDBName = 
+storage.SQLTableName = 
+storage.SQLVolumeIDColumnName = 
+storage.SQLDataColumnName = 
+storage.localStorageRoot = 
+documents.defaultValiditytime = 86400
+documents.defaultPath = 
