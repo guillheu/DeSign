@@ -22,16 +22,9 @@ function buf2hex(buffer) { // buffer is an ArrayBuffer
 }*/
 
 async function initWeb3(nodeURL){
-    ethEnabled = false;
-    if (window.ethereum) {
-        web3 = new Web3(window.ethereum);
-        await window.ethereum.enable();
-        ethEnabled = true;
-    }
-    else{
-    	web3 = new Web3(nodeURL);
-        ethEnabled = true;
-    }
+
+  	web3 = new Web3(nodeURL);
+    ethEnabled = true;
     console.log("web3 initialized");
 }
 

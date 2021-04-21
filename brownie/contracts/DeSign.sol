@@ -20,7 +20,7 @@ contract DeSign is AccessControl{
 /**
  * @notice Logs all signatures with the address of the signatory, the hashed index, and the rest of the data contained in {IndexEntry}
  */
-	event SignedEntry(bytes32 indexed indexHash, IndexEntry indexed indexEntry);
+	event SignedEntry(bytes32 indexed indexHash, bytes32 indexed _documentVolumeHash, address indexed _signatory);
 
     bytes32 public constant SIGNATORY_ROLE = keccak256("SIGNATORY_ROLE");
 
@@ -64,7 +64,7 @@ contract DeSign is AccessControl{
  */
 	function signMerkleRoot(bytes32 _indexHash, bytes32 documentVolumeHash, uint _secondsBeforeExpiration) external onlySignatory {
 		index[_indexHash] = IndexEntry(documentVolumeHash, block.timestamp + _secondsBeforeExpiration, msg.sender);
-		emit SignedEntry(_indexHash, index[_indexHash]);
+		emit SignedEntry(_indexHash, documentVolumeHash, msg.sender);
 	}
 
 /**

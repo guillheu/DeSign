@@ -4,6 +4,6 @@ def main():
 	
 	#deploying to blockchain
 
-	accounts.load("dev_kovan")
+	accounts.default = accounts[0];
 	contract = DeSign.deploy({'from': accounts[0]})
 	#djangoDeploy("Defi", contract)

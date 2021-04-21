@@ -155,7 +155,7 @@ public class DeSign_test {
 						+ "1) Sign a document volume\n"
 						+ "2) Check a stored signature\n"
 						+ "3) Export a document's signature proof\n"
-						+ "4) Index a document into the SQL database"
+						+ "4) Index a document into the SQL database\n"
 						);
 				try {
 					action = Integer.parseInt(console.readLine());
