@@ -95,6 +95,7 @@ public class DeSignCore {
 		Tuple3<byte[], BigInteger, String> r = getIndexInfo(index);
 		System.out.println("found signature : " + BytesUtils.bytesToHexString(r.component1()));
 		System.out.println("signed by " + r.component3());
+		System.out.println("valid for " + r.component2().divide(BigInteger.valueOf(86400)).floatValue()+ "days");
 		return (BytesUtils.bytesToHexString(r.component1()).equals(BytesUtils.bytesToHexString(storage.getIndexedDocumentVolumeMerkleRoot(index, hashAlgo))));
 	}
 	
@@ -154,4 +155,5 @@ public class DeSignCore {
 	public void indexDocumentIntoStorage(byte[] document, String index) {
 		storage.importDocument(document, index, hashAlgo);
 	}
+
 }

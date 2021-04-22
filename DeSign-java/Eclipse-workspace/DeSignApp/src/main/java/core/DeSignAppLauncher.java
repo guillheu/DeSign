@@ -111,7 +111,7 @@ public class DeSignAppLauncher {
 				try {
 					BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 					int action = 0;
-					while(action != 1 && action != 2 && action != 3 && action != 4) {
+					while(action != 1 && action != 2 && action != 3 && action != 4 && action != 5) {
 						System.out.println("Welcome to DeSign\n\n"
 								+ "node URL : " + launcher.nodeURL + "\n"
 								+ "contract address : " + launcher.addr + "\n"
@@ -122,6 +122,7 @@ public class DeSignAppLauncher {
 								+ "2) Check a stored signature\n"
 								+ "3) Export a document's signature proof\n"
 								+ "4) Index a document into the SQL database\n"
+								+ "5) Show current account balance\n"
 								);
 						try {
 							action = Integer.parseInt(console.readLine());
@@ -186,6 +187,9 @@ public class DeSignAppLauncher {
 						documentName = console.readLine();
 						byte[] document = FileUtils.readFileToByteArray(new File(documentPath + documentName));
 						coreSQLDB.indexDocumentIntoStorage(document, index);
+					}
+					else if(action == 5) {
+						System.out.println(coreSQLDB.getAddressBalance(creds.getAddress()) + "ETH\n");
 					}
 					
 				} catch (Exception e) {

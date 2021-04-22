@@ -66,7 +66,7 @@ public class SQLStorage extends DocumentVolumeStorage {
 			rs = stmt.executeQuery(query);
 			List<String> res = new ArrayList<String>();
 
-			System.err.println("running the following query : \n" + query);
+			//System.err.println("running the following query : \n" + query);
 			while(rs.next()) {
 				res.add(BytesUtils.bytesToHexString(hashAlgo.digest(rs.getBytes(dataColumnName))));
 			}
@@ -107,7 +107,7 @@ public class SQLStorage extends DocumentVolumeStorage {
 			stmt = SQLConnection.createStatement();
 			rs = stmt.executeQuery(query);
 
-			System.err.println("running the following query : \n" + query);
+			//System.err.println("running the following query : \n" + query);
 			while(rs.next()) {
 				indexHash = BytesUtils.bytesToHexString(rs.getBytes(indexHashColumnName));
 			}
@@ -146,7 +146,7 @@ public class SQLStorage extends DocumentVolumeStorage {
 			stmt = SQLConnection.createStatement();
 			stmt.executeUpdate(query);
 
-			System.err.println("running the following query : \n" + query);
+			//System.err.println("running the following query : \n" + query);
 		} catch (SQLException ex) {
 		    // handle any errors
 			System.err.println("Attempted query : " + query);
