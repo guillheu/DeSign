@@ -18,6 +18,7 @@ public class SQLStorage extends DocumentVolumeStorage {
 
 	private Connection SQLConnection;
 	private String DBName, tableName, indexHashColumnName, dataColumnName;
+	private String idColumnName = "id";
 
 	public SQLStorage(MessageDigest hashAlgo, String connectionLink, String DBName, String tableName, String volumeIdColumnName, String dataColumnName) {
 		
@@ -164,6 +165,47 @@ public class SQLStorage extends DocumentVolumeStorage {
 		        stmt = null;
 		    }
 		}
+	}
+
+	@Override
+	public byte[] getDocumentFromID(int documentID) {
+		Statement stmt = null;
+		ResultSet rs = null;
+		byte[] documentBytes = null;
+		
+		String query = "SELECT " + dataColumnName + " FROM " + DBName + "." + tableName + " WHERE "+ idColumnName  + " = " + documentID + ";";
+		
+		try {
+			stmt = SQLConnection.createStatement();
+			rs = stmt.executeQuery(query);
+
+			//System.err.println("running the following query : \n" + query);
+			while(rs.next()) {
+				documentBytes = rs.getBytes(dataColumnName);
+			}
+		} catch (SQLException ex) {
+		    // handle any errors
+			System.err.println("Attempted query : " + query);
+		    System.err.println("SQLException: " + ex.getMessage());
+		    System.err.println("SQLState: " + ex.getSQLState());
+		    System.err.println("VendorError: " + ex.getErrorCode());
+		    ex.printStackTrace();
+		}
+		finally {
+		    if (rs != null) {
+		        try {
+		            rs.close();
+		        } catch (SQLException sqlEx) { } // ignore
+		        rs = null;
+		    }
+		    if (stmt != null) {
+		        try {
+		            stmt.close();
+		        } catch (SQLException sqlEx) { } // ignore
+		        stmt = null;
+		    }
+		}
+		return documentBytes;
 	}
 
 }

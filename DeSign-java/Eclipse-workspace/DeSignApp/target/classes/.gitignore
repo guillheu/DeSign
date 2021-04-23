@@ -1,4 +1,5 @@
 /webAdmin/
-/storage/
-/META-INF/
+/web/
 /core/
+/META-INF/
+/storage/

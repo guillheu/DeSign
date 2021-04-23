@@ -63,3 +63,5 @@ def testsignMerkleRoot(DeSignContract):
 	assert events['SignedEntry']["indexHash"] == "0x" + indexHash.hex()
 	assert events['SignedEntry']["_documentVolumeHash"] == "0x" + merkleRoot.hex()
 	assert events['SignedEntry']["_signatory"] == owner
+
+

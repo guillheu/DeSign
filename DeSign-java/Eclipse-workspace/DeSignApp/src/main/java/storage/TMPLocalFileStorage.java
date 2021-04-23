@@ -80,6 +80,17 @@ public class TMPLocalFileStorage extends DocumentVolumeStorage {
 
 
 
+
+
+	@Override
+	public byte[] getDocumentFromID(int documentID) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+
 	
 	
 	

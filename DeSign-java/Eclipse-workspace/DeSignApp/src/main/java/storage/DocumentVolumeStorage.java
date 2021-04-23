@@ -14,4 +14,7 @@ public abstract class DocumentVolumeStorage {
 	public abstract List<Pair<String,String>> getMerklePath(byte[] document, MessageDigest hashAlgo) throws Exception;
 	
 	public abstract void importDocument(byte[] document, String index, MessageDigest hashAlgo);
+
+
+	public abstract byte[] getDocumentFromID(int documentID);
 }

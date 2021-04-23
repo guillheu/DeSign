@@ -2,12 +2,14 @@ package core;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
@@ -95,6 +97,69 @@ public class DeSignAppLauncher {
 		coreSQLDB = new DeSignCore(nodeURL, addr, creds, gasProvider, SQLStorage, sha256);
 	}
 	
+	public String getAccountBalance() {
+		try {
+			return coreSQLDB.getAddressBalance(creds.getAddress()) + "ETH\n";
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "Error, try again later";
+	}
+
+	public boolean signDocumentVolume(String index, int validityTime) {
+		try {
+			coreSQLDB.sign(index, validityTime*86400);
+			return true;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public String checkSignature(String index) {
+		try {
+			if(coreSQLDB.checkSignature(index)) {
+				return "Signature matched documents !\n";
+			}
+			else {
+				return "Signatures did not match - Check database integrity\n";
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "Something went wrong";
+		}
+	}
+	
+	public boolean exportSigProof(byte[] document, String path) {
+		try {
+			SignatureProof sigProof = coreSQLDB.getSignatureProof(document, this.externalNodeURL);
+			Gson gson = new Gson();
+			String json = gson.toJson(sigProof);
+			json = json.replace("first", "hashFrom");
+			json = json.replace("second", "hashWith");
+			Files.writeString(Paths.get(path + "sigProof.json"), json, StandardCharsets.UTF_8);
+			return true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public boolean exportSigProof(int documentID, String path) {
+		return exportSigProof(coreSQLDB.getDocumentFromID(documentID), path);
+	}
+	
+	public boolean importDocument(byte[] document, String index) {
+		
+
+		coreSQLDB.indexDocumentIntoStorage(document, index);
+		
+		return true;
+	}
+	
 	
 	
 	public static void main(String args[]) {
@@ -136,30 +201,16 @@ public class DeSignAppLauncher {
 						System.out.println("What is the index ?");
 						index = console.readLine();
 						System.out.println("How many days before documents expiration ?");
-						secondsBeforeExpiration = Integer.parseInt(console.readLine())*86400;
+						secondsBeforeExpiration = Integer.parseInt(console.readLine());
+						launcher.signDocumentVolume(index, secondsBeforeExpiration);
 						
-						try {
-							coreSQLDB.sign(index, secondsBeforeExpiration);
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
 					}
 					else if(action == 2) {
 						String index;
 						System.out.println("What is the index to check ?");
 						index = console.readLine();
-						try {
-							if(coreSQLDB.checkSignature(index)) {
-								System.out.println("Signature matched documents !");
-							}
-							else {
-								System.out.println("Signatures did not match");
-							}
-						} catch (Exception e) {
-							System.err.println("Something went wrong");
-							e.printStackTrace();
-						}
+						System.out.println(launcher.checkSignature(index));
+						
 					}
 					else if(action == 3) {
 						String documentPath;
@@ -169,12 +220,7 @@ public class DeSignAppLauncher {
 						System.out.println("What is the name of the document ?");
 						documentName = console.readLine();
 						byte[] document = FileUtils.readFileToByteArray(new File(documentPath+documentName));
-						SignatureProof sigProof = coreSQLDB.getSignatureProof(document, launcher.externalNodeURL);
-						Gson gson = new Gson();
-						String json = gson.toJson(sigProof);
-						json = json.replace("first", "hashFrom");
-						json = json.replace("second", "hashWith");
-						Files.writeString(Paths.get(documentPath + "sigProof.json"), json, StandardCharsets.UTF_8);
+						launcher.exportSigProof(document, documentPath);
 					}
 					else if(action == 4) {
 						String documentName;
@@ -186,10 +232,10 @@ public class DeSignAppLauncher {
 						System.out.println("What is the name of the document ?");
 						documentName = console.readLine();
 						byte[] document = FileUtils.readFileToByteArray(new File(documentPath + documentName));
-						coreSQLDB.indexDocumentIntoStorage(document, index);
+						launcher.importDocument(document, index);
 					}
 					else if(action == 5) {
-						System.out.println(coreSQLDB.getAddressBalance(creds.getAddress()) + "ETH\n");
+						System.out.println(launcher.getAccountBalance());
 					}
 					
 				} catch (Exception e) {
@@ -208,5 +254,46 @@ public class DeSignAppLauncher {
 			}
 		}
 	}
+
+	public String getHashAlgo() {
+		return hashAlgo;
+	}
+
+	public String getContractAddress() {
+		return addr;
+	}
+
+	public String getNodeURL() {
+		return nodeURL;
+	}
+
+	public BigInteger getGasPrice() {
+		return gasPrice;
+	}
+
+	public BigInteger getGasLimit() {
+		return gasLimit;
+	}
+
+	public String getExternalNodeURL() {
+		return externalNodeURL;
+	}
+
+	public String getDefaultFilePath() {
+		return defaultFilePath;
+	}
 	
+	public String getUserAddress() {
+		return creds.getAddress();
+	}
+	
+	public String getUserBalance() {
+		try {
+			return coreSQLDB.getAddressBalance(addr).toPlainString();
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "THERE WAS AN ERROR";
+	}
 }

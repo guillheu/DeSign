@@ -156,4 +156,9 @@ public class DeSignCore {
 		storage.importDocument(document, index, hashAlgo);
 	}
 
+	public byte[] getDocumentFromID(int documentID) {
+		
+		return storage.getDocumentFromID(documentID);
+	}
+
 }
