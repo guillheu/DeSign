@@ -110,42 +110,34 @@ Since this client only reads from the blockchain, it does not require metamask, 
 
 # FAQ
 
-**"What is a Merkle tree ? What is a Merkle path ?"**
-
+###**"What is a Merkle tree ? What is a Merkle path ?"**
 [See this helpful link](https://medium.com/@jgm.orinoco/understanding-merkle-pollards-1547fc7efaa)
 
 
-**"Why sign Merkle tree roots instead of signing the documents directly ?"**
-
+###**"Why sign Merkle tree roots instead of signing the documents directly ?"**
 Signing a Merkle tree root is equivalent to signing all the documents that make up the Merkle tree, allowing us to reduce costs by sending a single transaction instead of potentially hundreds or thousands.
 
 
-**"Can I make a program that would verify the proof of signature for a given document ?"**
-
+###**"Can I make a program that would verify the proof of signature for a given document ?"**
 Yes, and we encourage you to ! The point of the proof of signature is to have the least equivocable way of identifying a signature. Our implementation (the [light web client](https://github.com/guillheu/DeSign#light-web-client)) was posted to IPFS precisely to reduce the likelyhood that someone somewhere may falsify the result being displayed on screen and make the proof more trustworthy and legally potent. Having third-party implementations of our proof of signature checker would further that aim.
 
 
-**"What node URL should I use ?"**
-
+###**"What node URL should I use ?"**
 The node URL depends on the network you want to connect to. One way to get one is to use a service like [Infura](https://infura.io/), create a new project, select a network and copy the provided node URL.
 
 
-**"Why are there 2 node URLs in the config file ?"**
-
+###**"Why are there 2 node URLs in the config file ?"**
 The `blockchain.nodeURL` is the URL of the node the client you're running will send transactions to.
 The `blockchain.nodeURLForExternalChecks` is the URL that will be included in the proofs of signature
 
 
-**"Why use an external node URL instead of having the light web client use the local metamask installation ?"**
-
+###**"Why use an external node URL instead of having the light web client use the local metamask installation ?"**
 We want the signature checking process to be plug-and-play even for users that know nothing about the blockchain, thus it is necessary to specify in the signature proof which node URL is to be used to check a signature. That being said, we plan on implementing the ability for the light web client user [to choose between using the provided node URL, or using their browser wallet like metamask](https://github.com/guillheu/DeSign#future-features)
 
 
-**"I changed the configuration file, but my changes were not loaded into the app !"**
-
+###**"I changed the configuration file, but my changes were not loaded into the app !"**
 The executable jar heavy client will only load the config file on startup. The war file release however will load the config file each time a page is loaded.
 
 
-**"What's the difference between an index, a document volume and a document volume ID ?"**
-
+###**"What's the difference between an index, a document volume and a document volume ID ?"**
 A document volume is a set of document we wish to sign all at once (by signing the root of the Merkle tree built from them). The "index" is a unique identifier of a given document volume. It can be anything, a date, a name, or even song lyrics. A document volume ID is the hash of the index that will identify all the documents that belong to a document volume ; all the documents with the same volume ID (and therefor the same index) will be in the same document volume.
