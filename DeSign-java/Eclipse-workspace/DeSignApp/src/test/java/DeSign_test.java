@@ -85,6 +85,7 @@ public class DeSign_test {
 	static String linkDBVolume2;
 	static byte[] dataHash;
 	static int amountOfLeaves = 7;
+	static String secondUser = "0x74DCaFDc8591f44a1516b0CB2B979223b3c4fad1";
 
 
 	
@@ -317,6 +318,29 @@ public class DeSign_test {
 			System.out.println("found on signature : " + foundRoot);
 			System.out.println("found on chain : " + BytesUtils.bytesToHexString(output.component1()));
 			assertTrue(BytesUtils.bytesToHexString(output.component1()).equals(foundRoot));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testRoles(){
+		try {
+			assertTrue(coreSQLDB.isSignatory(creds.getAddress()));
+			assertFalse(coreSQLDB.isSignatory(secondUser));
+			assertTrue(coreSQLDB.isDefaultAdmin(creds.getAddress()));
+			assertFalse(coreSQLDB.isDefaultAdmin(secondUser));
+			coreSQLDB.makeSignatory(secondUser);
+			assertTrue(coreSQLDB.isSignatory(creds.getAddress()));
+			assertTrue(coreSQLDB.isSignatory(secondUser));
+			assertTrue(coreSQLDB.isDefaultAdmin(creds.getAddress()));
+			assertFalse(coreSQLDB.isDefaultAdmin(secondUser));
+			coreSQLDB.revokeSignatory(secondUser);
+			assertTrue(coreSQLDB.isSignatory(creds.getAddress()));
+			assertFalse(coreSQLDB.isSignatory(secondUser));
+			assertTrue(coreSQLDB.isDefaultAdmin(creds.getAddress()));
+			assertFalse(coreSQLDB.isDefaultAdmin(secondUser));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

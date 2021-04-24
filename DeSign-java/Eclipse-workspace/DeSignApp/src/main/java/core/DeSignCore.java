@@ -26,6 +26,9 @@ public class DeSignCore {
 	private DocumentVolumeStorage storage;
 	private MessageDigest hashAlgo;
 	private ContractGasProvider gasProvider;
+
+	private final byte[] defaultAdminRole = BytesUtils.hexStringToByteArray("0000000000000000000000000000000000000000000000000000000000000000");;
+	private final byte[] signatoryRole = BytesUtils.hexStringToByteArray("9838a05512653d899e198165cc2a8305c24ac29892037f9cab63bdb153121845");
 	
 
 
@@ -161,4 +164,22 @@ public class DeSignCore {
 		return storage.getDocumentFromID(documentID);
 	}
 
+	
+	
+
+	public boolean isSignatory(String address) throws Exception {
+		return contract.hasRole(signatoryRole, address).send();
+	}
+
+	public boolean isDefaultAdmin(String address) throws Exception {
+		return contract.hasRole(defaultAdminRole, address).send();
+	}
+
+	public void makeSignatory(String address) throws Exception {
+		contract.grantRole(signatoryRole, address).send();
+	}
+
+	public void revokeSignatory(String address) throws Exception {
+		contract.revokeRole(signatoryRole, address).send();
+	}
 }

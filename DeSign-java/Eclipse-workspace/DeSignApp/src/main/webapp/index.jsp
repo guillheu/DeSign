@@ -22,7 +22,8 @@ if(result == null){
 }
 
 %>
-<%= result %><br>
+<h3>
+<%= result %><br></h3>
 
 <br>
  Node URL :  <%= launcher.getNodeURL() %><br>
@@ -44,6 +45,10 @@ Check the integrity of the database against a blockchain signature<br>
 </form><br>
 <form action="./export.jsp">
 Export a proof of signature <br>
+<input type="submit" value="Submit"><br>
+</form><br>
+<form action="./manageRoles.jsp">
+Role management<br>
 <input type="submit" value="Submit"><br>
 </form><br>
 </body>
