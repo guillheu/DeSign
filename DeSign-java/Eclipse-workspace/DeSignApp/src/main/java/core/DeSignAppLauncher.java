@@ -45,6 +45,7 @@ public class DeSignAppLauncher {
 	private String SQLTableName;
 	private String SQLVolumeIDColumnName;
 	private String SQLDataColumnName;
+	private String SQLIdColumnName;
 	private String externalNodeURL;
 	private String defaultFilePath;
 	private String sqlDriverClassName;
@@ -84,6 +85,7 @@ public class DeSignAppLauncher {
 		SQLTableName = 				config.getString("storage.SQLTableName");
 		SQLVolumeIDColumnName = 	config.getString("storage.SQLVolumeIDColumnName");
 		SQLDataColumnName = 		config.getString("storage.SQLDataColumnName");
+		SQLIdColumnName = 			config.getString("storage.idColumnName");
 		externalNodeURL = 			config.getString("blockchain.nodeURLForExternalChecks");
 		defaultFilePath = 			config.getString("documents.defaultPath");
 		sqlDriverClassName = 		config.getString("storage.SQLDriver");
@@ -92,7 +94,7 @@ public class DeSignAppLauncher {
 		gasProvider = new StaticGasProvider(gasPrice, gasLimit);
 		creds = Credentials.create(privateKey);
 		sha256 = MessageDigest.getInstance(hashAlgo);
-		SQLStorage =  new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName);
+		SQLStorage =  new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName, SQLIdColumnName);
 		coreLocalStorage = new DeSignCore(nodeURL, addr, creds, gasProvider, localStorage, sha256);
 		coreSQLDB = new DeSignCore(nodeURL, addr, creds, gasProvider, SQLStorage, sha256);
 	}
@@ -188,7 +190,7 @@ public class DeSignAppLauncher {
 								+ "1) Sign a document volume\n"
 								+ "2) Check a stored signature\n"
 								+ "3) Export a document's signature proof\n"
-								+ "4) Index a document into the SQL database\n"
+								+ "4) Index a document into the SQL database (DO NOT USE FOR PRODUCTION)\n"
 								+ "5) Role management\n"
 								);
 						try {

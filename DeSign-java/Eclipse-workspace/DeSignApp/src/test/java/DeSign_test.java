@@ -51,6 +51,7 @@ public class DeSign_test {
 	static String SQLTableName;
 	static String SQLVolumeIDColumnName;
 	static String SQLDataColumnName;
+	static String SQLIdColumnName;
 	static String localStorageRoot;
 	static String externalNodeURL;
 	static String defaultFilePath;
@@ -109,6 +110,7 @@ public class DeSign_test {
 			SQLTableName = 				config.getString("storage.SQLTableName");
 			SQLVolumeIDColumnName = 	config.getString("storage.SQLVolumeIDColumnName");
 			SQLDataColumnName = 		config.getString("storage.SQLDataColumnName");
+			SQLIdColumnName = 			config.getString("storage.idColumnName");
 			localStorageRoot = 			config.getString("storage.localStorageRoot");
 			externalNodeURL = 			config.getString("blockchain.nodeURLForExternalChecks");
 			defaultFilePath = 			config.getString("documents.defaultPath");
@@ -126,7 +128,7 @@ public class DeSign_test {
 			sha256 = MessageDigest.getInstance(hashAlgo);
 			dataHash = sha256.digest(FileUtils.readFileToByteArray(new File(localStoragePath)));
 			localStorage =  new TMPLocalFileStorage(localStorageRoot);
-			SQLStorage =  new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName);
+			SQLStorage =  new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName, SQLIdColumnName);
 			coreLocalStorage = new DeSignCore(nodeURL, addr, creds, gasProvider, localStorage, sha256);
 			coreSQLDB = new DeSignCore(nodeURL, addr, creds, gasProvider, SQLStorage, sha256);
 			linkDBVolume1 = BytesUtils.bytesToHexString(sha256.digest(indexVolume1.getBytes()));

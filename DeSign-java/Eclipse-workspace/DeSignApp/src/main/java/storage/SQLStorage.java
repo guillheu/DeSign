@@ -18,9 +18,9 @@ public class SQLStorage extends DocumentVolumeStorage {
 
 	private Connection SQLConnection;
 	private String DBName, tableName, indexHashColumnName, dataColumnName;
-	private String idColumnName = "id";
+	private String idColumnName;
 
-	public SQLStorage(MessageDigest hashAlgo, String connectionLink, String DBName, String tableName, String volumeIdColumnName, String dataColumnName) {
+	public SQLStorage(MessageDigest hashAlgo, String connectionLink, String DBName, String tableName, String volumeIdColumnName, String dataColumnName, String sQLIdColumnName) {
 		
 		try {
             
@@ -34,6 +34,7 @@ public class SQLStorage extends DocumentVolumeStorage {
 		this.tableName = tableName;
 		this.indexHashColumnName = volumeIdColumnName;
 		this.dataColumnName = dataColumnName;
+		this.idColumnName = sQLIdColumnName;
 	}
 
 	@Override

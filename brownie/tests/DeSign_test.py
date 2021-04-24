@@ -45,6 +45,7 @@ def testsignMerkleRoot(DeSignContract):
 	print(indexData)
 	assert indexData[0] == "0x" + merkleRoot.hex()
 	assert indexData[1] <= validityTime
+	assert indexData[2] == owner
 
 	try:
 		indexData = DeSignContract.getIndexData(to_bytes(hashlib.sha256("an unused index".encode()).hexdigest()))
