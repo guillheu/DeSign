@@ -12,6 +12,7 @@ The database must have a table (storage.SQLTableName in the properties file) wit
 * a BLOB column for the document binaries (storage.SQLDataColumnName)
 
 Here is an example of a working database :
+
 ![SQL database example](https://i.imgur.com/z3BD2Kq.png)
 
 You must also specify the SQL driver name (storage.SQLDriver) in the properties file.
@@ -44,3 +45,12 @@ documents.defaultPath = /path/to/dir/
 ```
 
 this file must be named `config.properties` and placed in the same folder as the jar executable, or in your `[TOMCAT_FOLDER]/webapps/DeSignApp/WEB-INF/classes` folder for the deployed DeSignApp app
+
+
+#Future features
+* Importing wallet file instead of requiring an ethereum private key in the config file
+* ERC 725/735 for authentication, authorization and identidy management
+* Third party signature request with timeout
+* Multi-signature from several authorized parties
+* Decentralized proofs of signature (uploaded directly onto IPFS, requires either an IPFS node or the use of filecoins)
+* More back-end storage support (local files, non-SQL databases...)
