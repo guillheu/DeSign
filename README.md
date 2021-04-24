@@ -18,6 +18,16 @@ The goal is to let an entity sign documents and generate proofs of their signatu
 * Java heavy client & ipfs web light client (proof of signature checking only)
 
 # Installation
+
+## Light web client
+The light web client does not require any installation. Currently it only allows the user to check the validity of a signature from the original unaltered file and the proof of signature file.
+Since this client only reads from the blockchain, it does not require metamask, and is perfectly transparent to the user.
+
+[You can find the ipfs-hosted light web client here...](https://ipfs.io/ipfs/QmcLEpxfJ2BjQiDDDuAMMDU86JeUuqibMkv9gMJudTwPug?filename=userInterface.html)
+
+[... Or check out it's source here](https://github.com/guillheu/DeSign/blob/main/userAPI/userInterface.html)
+
+
 ## Heavy client
 ### Setting up the SQL database
 The releases only work with a pre-deployed SQL database.
@@ -82,15 +92,6 @@ This file must be named `config.properties`.
 To run the executable jar release, run this command :
 `java -jar path/to/jar/DeSignApp.jar path/to/config/config.properties`
 To run the TOMCAT war file, place the `config.properties` file in the  `[TOMCAT_FOLDER]/webapps/DeSignApp/WEB-INF/classes/` folder.
-
-
-## Light web client
-The light web client does not require any installation. Currently it only allows the user to check the validity of a signature from the original unaltered file and the proof of signature file.
-Since this client only reads from the blockchain, it does not require metamask, and is perfectly transparent to the user.
-
-[You can find the ipfs-hosted light web client here...](https://ipfs.io/ipfs/QmcLEpxfJ2BjQiDDDuAMMDU86JeUuqibMkv9gMJudTwPug?filename=userInterface.html)
-
-[... Or check out it's source here](https://github.com/guillheu/DeSign/blob/main/userAPI/userInterface.html)
 
 
 # Future features
