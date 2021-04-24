@@ -12,7 +12,7 @@ The database must have a table (storage.SQLTableName in the properties file) wit
 * a BLOB column for the document binaries (storage.SQLDataColumnName)
 
 Here is an example of a working database :
-![SQL database example](https://imgur.com/z3BD2Kq)
+![SQL database example](https://i.imgur.com/z3BD2Kq.png)
 
 You must also specify the SQL driver name (storage.SQLDriver) in the properties file.
 for example, it is "com.mysql.cj.jdbc.Driver" for a mysql database.
