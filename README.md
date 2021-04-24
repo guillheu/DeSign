@@ -1,5 +1,5 @@
 # DeSign
-###A decentralized solution for digital signatures.
+### A decentralized solution for digital signatures.
 
 The intrinsic qualities (public, irreversible, irrepudiable) of any blockchain allow it to be a prime solution for storing digital signature.
 This solution uses Ethereum smart contracts to run on any EVM blockchain and allow authorized addresses to sign document (hashes) onto the blockchain.
@@ -8,7 +8,7 @@ It also is meant to run directly onto a client's already existing infrastructure
 The goal is to let an entity sign documents and generate proofs of their signature with legal footing.
 
 ## Features
-* GDPR compliant through the publication of hashes instead of raw documents
+* _GDPR compliant_ through the publication of hashes instead of raw documents
 * Generating proofs of signature for individual documents without compromizing the confidentiality of the rest of the database
 * Signing multiple documents at once through the use of a Merkle Tree
 * Interfaces with any pre-existing SQL database
@@ -58,6 +58,10 @@ storage.idColumnName = id
 storage.SQLDriver = com.mysql.cj.jdbc.Driver
 documents.defaultPath = /path/to/dir/
 ```
+
+Configuration field name | details | examples
+------------------------ | ------- | -------
+crypto.hashAlgo          | Hash algorithm to use in Merkle trees & index hashing | `SHA-256`; `SHA-1`
 
 This file must be named `config.properties`.
 
