@@ -59,23 +59,23 @@ storage.SQLDriver = com.mysql.cj.jdbc.Driver
 documents.defaultPath = /path/to/dir/
 ```
 
-Configuration field name | Description | Example | Notes
------------------------- | ----------- | ------- | -----
-`crypto.hashAlgo` | Message digest algorithm to use in Merkle trees & index hashing | `SHA-256` | Must be compliant with the [Java](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#messagedigest-algorithms) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#supported_algorithms) implementations
-`blockchain.privKey` | Private key of the ethereum account to sign transactions with | `0x00112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF` (DO NOT USE THIS) | [Helpful link](https://vomtom.at/ethereum-private-and-public-keys/)
-`blockchain.contractAddr` | The address of the DeSign smart contract to use | `0xD8D74044703C2f98B38E048c639F2c32860cA278` | [Helpful link](https://ethereum.org/en/developers/docs/accounts/#types-of-account)
+Configuration field name | Description | Notes
+------------------------ | ----------- | -----
+`crypto.hashAlgo` | Message digest algorithm to use in Merkle trees & index hashing | Must be compliant with the [Java](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#messagedigest-algorithms) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#supported_algorithms) implementations
+`blockchain.privKey` | Private key of the ethereum account to sign transactions with | [Helpful link](https://vomtom.at/ethereum-private-and-public-keys/)
+`blockchain.contractAddr` | The address of the DeSign smart contract to use | [Helpful link](https://ethereum.org/en/developers/docs/accounts/#types-of-account)
 `blockchain.nodeURL` | URL of the node to send transactions to | `https://kovan.infura.io/v3/7cdcc900133c425fab136c45f004893b` | [Helpful link](https://ethereum.org/en/developers/docs/nodes-and-clients/)
-`blockchain.nodeURLForExternalChecks` | URL of the node that a [light web client](https://github.com/guillheu/DeSign#light-web-client) would use to connect to the blockchain | `https://kovan.infura.io/v3/7cdcc900133c425fab136c45f004893b` | This can be useful to have be different than `blockchain.nodeURL`, for instance if the client is running it's own local node for which the link differs whether the call is made from the local network or from the internet. It's also possible that the client does not wish to have their local node used by external calls at all
-`blockchain.gasPrice` | Gas price in Wei to use for transactions | `4100000000` | Currently gas price is static. See [Future features](https://github.com/guillheu/DeSign#future-features)
-`blockchain.gasLimit` | Maximum gas to use in a block | `12000000` | [Helpful link](https://ethereum.stackexchange.com/questions/50283/why-is-there-block-gas-limit#:~:text=gas%20limit%20of%20a%20block%20defines%20maximum%20gas,who%20could%20make%20an%20effective%20infinite%20transaction%20loop.)
-`storage.SQLconnexionLink` | URL to connect to the SQL database | `jdbc:mysql://127.0.0.1/?user=USER&password=PASSWORD` | Username and password currently included in the link. See [Future features](https://github.com/guillheu/DeSign#future-features)
-`storage.SQLDBName` | Name of the SQL database (scheme) to query | `test` | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
-`storage.SQLTableName` | Name of the table to query in the SQL database | `Documents` | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
-`storage.SQLVolumeIDColumnName` | Name of the document volume/index hash column in the given SQL table | `id` | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
-`storage.SQLDataColumnName` | Name of the data column in the given SQL table | `data` | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
-`storage.idColumnName` | Name of the unique document ID column in the given SQL table | `id` | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
-`storage.SQLDriver` | Name of the Java driver to use to interact with the SQL database | `com.mysql.cj.jdbc.Driver` | See [this list of drivers](https://www.roseindia.net/tutorial/java/jdbc/listofjdbcdriver.html). Note that not all drivers may be implemented.
-`documents.defaultPath` | Default location to import files from and export proofs of signature to | `/home/username/myDir/` | Format may vary depending on operating system. be sure to include a final slash (`/`) or backslash (`\`)
+`blockchain.nodeURLForExternalChecks` | URL of the node that a [light web client](https://github.com/guillheu/DeSign#light-web-client) would use to connect to the blockchain | This can be useful to have be different than `blockchain.nodeURL`, for instance if the client is running it's own local node for which the link differs whether the call is made from the local network or from the internet. It's also possible that the client does not wish to have their local node used by external calls at all
+`blockchain.gasPrice` | Gas price in Wei to use for transactions | Currently gas price is static. See [Future features](https://github.com/guillheu/DeSign#future-features)
+`blockchain.gasLimit` | Maximum gas to use in a block | [Helpful link](https://ethereum.stackexchange.com/questions/50283/why-is-there-block-gas-limit#:~:text=gas%20limit%20of%20a%20block%20defines%20maximum%20gas,who%20could%20make%20an%20effective%20infinite%20transaction%20loop.)
+`storage.SQLconnexionLink` | URL to connect to the SQL database | Username and password currently included in the link. See [Future features](https://github.com/guillheu/DeSign#future-features)
+`storage.SQLDBName` | Name of the SQL database (scheme) to query | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
+`storage.SQLTableName` | Name of the table to query in the SQL database | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
+`storage.SQLVolumeIDColumnName` | Name of the document volume/index hash column in the given SQL table | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
+`storage.SQLDataColumnName` | Name of the data column in the given SQL table | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
+`storage.idColumnName` | Name of the unique document ID column in the given SQL table | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
+`storage.SQLDriver` | Name of the Java driver to use to interact with the SQL database | See [this list of drivers](https://www.roseindia.net/tutorial/java/jdbc/listofjdbcdriver.html). Note that not all drivers may be implemented.
+`documents.defaultPath` | Default location to import files from and export proofs of signature to | Format may vary depending on operating system. be sure to include a final slash (`/`) or backslash (`\`)
 
 This file must be named `config.properties`.
 
