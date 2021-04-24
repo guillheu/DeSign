@@ -21,10 +21,10 @@ The goal is to let an entity sign documents and generate proofs of their signatu
 ## Heavy client
 ### Setting up the SQL database
 The releases only work with a pre-deployed SQL database.
-The database must have a table (storage.SQLTableName in the properties file) with at least these 3 columns : 
-* an INT id primary key (storage.idColumnName)
-* a BLOB column for the 32 bytes index hashes (storage.SQLVolumeIDColumnName)
-* a BLOB column for the document binaries (storage.SQLDataColumnName)
+The database must have a table (`storage.SQLTableName` in the properties file) with at least these 3 columns : 
+* an INT id primary key (`storage.idColumnName`)
+* a BLOB column for the 32 bytes index hashes (`storage.SQLVolumeIDColumnName`)
+* a BLOB column for the document binaries (`storage.SQLDataColumnName`)
 
 Here is an example of a working database :
 
@@ -62,20 +62,20 @@ documents.defaultPath = /path/to/dir/
 Configuration field name | Description | Example | Notes
 ------------------------ | ----------- | ------- | -----
 `crypto.hashAlgo` | Message digest algorithm to use in Merkle trees & index hashing | `SHA-256` | Must be compliant with the [Java](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#messagedigest-algorithms) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#supported_algorithms) implementations
-`blockchain.privKey` | Private key of the ethereum account to sign transactions with | 0x00112233445566778899AABBCCDDEEFF<br />00112233445566778899AABBCCDDEEFF (DO NOT USE THIS) | [Helpful link](https://vomtom.at/ethereum-private-and-public-keys/)
+`blockchain.privKey` | Private key of the ethereum account to sign transactions with | `0x00112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF` (DO NOT USE THIS) | [Helpful link](https://vomtom.at/ethereum-private-and-public-keys/)
 `blockchain.contractAddr` | The address of the DeSign smart contract to use | `0xD8D74044703C2f98B38E048c639F2c32860cA278` | [Helpful link](https://ethereum.org/en/developers/docs/accounts/#types-of-account)
 `blockchain.nodeURL` | URL of the node to send transactions to | `https://kovan.infura.io/v3/7cdcc900133c425fab136c45f004893b` | [Helpful link](https://ethereum.org/en/developers/docs/nodes-and-clients/)
-`blockchain.nodeURLForExternalChecks` |
-`blockchain.gasPrice` |
-`blockchain.gasLimit` |
-`storage.SQLconnexionLink` |
-`storage.SQLDBName` |
-`storage.SQLTableName` |
-`storage.SQLVolumeIDColumnName` |
-`storage.SQLDataColumnName` |
-`storage.idColumnName` |
-`storage.SQLDriver` |
-`documents.defaultPath` |
+`blockchain.nodeURLForExternalChecks` | URL of the node that a [light web client](https://github.com/guillheu/DeSign#light-web-client) would use to connect to the blockchain | `https://kovan.infura.io/v3/7cdcc900133c425fab136c45f004893b` | This can be useful to have be different than `blockchain.nodeURL`, for instance if the client is running it's own local node for which the link differs whether the call is made from the local network or from the internet. It's also possible that the client does not wish to have their local node used by external calls at all
+`blockchain.gasPrice` | Gas price in Wei to use for transactions | `4100000000` | Currently gas price is static. See [Future features](https://github.com/guillheu/DeSign#future-features)
+`blockchain.gasLimit` | Maximum gas to use in a block | `12000000` | [Helpful link](https://ethereum.stackexchange.com/questions/50283/why-is-there-block-gas-limit#:~:text=gas%20limit%20of%20a%20block%20defines%20maximum%20gas,who%20could%20make%20an%20effective%20infinite%20transaction%20loop.)
+`storage.SQLconnexionLink` | URL to connect to the SQL database | `jdbc:mysql://127.0.0.1/?user=USER&password=PASSWORD` | Username and password currently included in the link. See [Future features](https://github.com/guillheu/DeSign#future-features)
+`storage.SQLDBName` | Name of the SQL database (scheme) to query | `test` | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
+`storage.SQLTableName` | Name of the table to query in the SQL database | `Documents` | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
+`storage.SQLVolumeIDColumnName` | Name of the document volume/index hash column in the given SQL table | `id` | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
+`storage.SQLDataColumnName` | Name of the data column in the given SQL table | `data` | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
+`storage.idColumnName` | Name of the unique document ID column in the given SQL table | `id` | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
+`storage.SQLDriver` | Name of the Java driver to use to interact with the SQL database | `com.mysql.cj.jdbc.Driver` | See [this list of drivers](https://www.roseindia.net/tutorial/java/jdbc/listofjdbcdriver.html). Note that not all drivers may be implemented.
+`documents.defaultPath` | Default location to import files from and export proofs of signature to | `/home/username/myDir/` | Format may vary depending on operating system. be sure to include a final slash (`/`) or backslash (`\`)
 
 This file must be named `config.properties`.
 
@@ -94,20 +94,58 @@ Since this client only reads from the blockchain, it does not require metamask, 
 
 
 # Future features
-* Importing wallet file instead of requiring an ethereum private key in the config file
-* Improved security for database login
+
+
+* REST API
 * ERC 725/735 for authentication, authorization and identidy management
 * Third party signature request with timeout
 * Multi-signature from several authorized parties
-* Decentralized proofs of signature (uploaded directly onto IPFS, requires either an IPFS node or the use of filecoins)
+* Importing wallet file instead of requiring an ethereum private key in the config file
+* Improved security for database login
+* Variable gas price & gas limit
 * More back-end storage support (local files, non-SQL databases...)
+* Ability for the light web client to use a browser wallet (metamask) to connect to a network instead of the node URL provided in the proof of signature
 * Auto-generating & modifying the config file from the client itself (initialization wizard)
+* Decentralized proofs of signature (uploaded directly onto IPFS, requires either an IPFS node or the use of filecoins)
 
 # FAQ
 
-"What node URL should I use ?"
+**"What is a Merkle tree ? What is a Merkle path ?"**
+
+[See this helpful link](https://medium.com/@jgm.orinoco/understanding-merkle-pollards-1547fc7efaa)
+
+
+**"Why sign Merkle tree roots instead of signing the documents directly ?"**
+
+Signing a Merkle tree root is equivalent to signing all the documents that make up the Merkle tree, allowing us to reduce costs by sending a single transaction instead of potentially hundreds or thousands.
+
+
+**"Can I make a program that would verify the proof of signature for a given document ?"**
+
+Yes, and we encourage you to ! The point of the proof of signature is to have the least equivocable way of identifying a signature. Our implementation (the [light web client](https://github.com/guillheu/DeSign#light-web-client)) was posted to IPFS precisely to reduce the likelyhood that someone somewhere may falsify the result being displayed on screen and make the proof more trustworthy and legally potent. Having third-party implementations of our proof of signature checker would further that aim.
+
+
+**"What node URL should I use ?"**
+
 The node URL depends on the network you want to connect to. One way to get one is to use a service like [Infura](https://infura.io/), create a new project, select a network and copy the provided node URL.
 
-"Why are there 2 node URLs in the config file ?"
+
+**"Why are there 2 node URLs in the config file ?"**
+
 The `blockchain.nodeURL` is the URL of the node the client you're running will send transactions to.
 The `blockchain.nodeURLForExternalChecks` is the URL that will be included in the proofs of signature
+
+
+**"Why use an external node URL instead of having the light web client use the local metamask installation ?"**
+
+We want the signature checking process to be plug-and-play even for users that know nothing about the blockchain, thus it is necessary to specify in the signature proof which node URL is to be used to check a signature. That being said, we plan on implementing the ability for the light web client user [to choose between using the provided node URL, or using their browser wallet like metamask](https://github.com/guillheu/DeSign#future-features)
+
+
+**"I changed the configuration file, but my changes were not loaded into the app !"**
+
+The executable jar heavy client will only load the config file on startup. The war file release however will load the config file each time a page is loaded.
+
+
+**"What's the difference between an index, a document volume and a document volume ID ?"**
+
+A document volume is a set of document we wish to sign all at once (by signing the root of the Merkle tree built from them). The "index" is a unique identifier of a given document volume. It can be anything, a date, a name, or even song lyrics. A document volume ID is the hash of the index that will identify all the documents that belong to a document volume ; all the documents with the same volume ID (and therefor the same index) will be in the same document volume.
