@@ -1,15 +1,17 @@
 # DeSign
 ### A decentralized solution for digital signatures.
 
-The intrinsic qualities (public, irreversible, irrepudiable) of any blockchain allow it to be a prime solution for storing digital signature.
-This solution uses Ethereum smart contracts to run on any EVM blockchain and allow authorized addresses to sign document (hashes) onto the blockchain.
-It also is meant to run directly onto a client's already existing infrastructure, and could theoretically handle millions or billions of document signatures each day (access to the database becomes the bottleneck, not the app itself).
+The intrinsic qualities (public, irreversible, irrepudiable) of any blockchain allow it to be a prime solution to store digital signatures.
+Our solution uses Ethereum smart contracts to run on any EVM blockchain and allow authorized addresses to sign documents (hashes) onto the blockchain.
+
+It is meant to run directly onto a client's already existing infrastructure, and could theoretically handle millions or billions of document signatures each day (access to the database becomes the bottleneck, not the app itself).
 
 The goal is to let an entity sign documents and generate proofs of their signature with legal footing.
 
 ## Features
 * _GDPR compliant_ through the publication of hashes instead of raw documents
 * Generating proofs of signature for individual documents without compromizing the confidentiality of the rest of the database
+* Much lower costs than currently available solutions
 * Signing multiple documents at once through the use of a Merkle Tree
 * Interfaces with any pre-existing SQL database
 * Ability to specify a lifetime for signatures
@@ -75,7 +77,7 @@ Configuration field name | Description | Notes
 `blockchain.privKey` | Private key of the ethereum account to sign transactions with | [Helpful link](https://vomtom.at/ethereum-private-and-public-keys/)
 `blockchain.contractAddr` | The address of the DeSign smart contract to use | [Helpful link](https://ethereum.org/en/developers/docs/accounts/#types-of-account)
 `blockchain.nodeURL` | URL of the node to send transactions to | [Helpful link](https://ethereum.org/en/developers/docs/nodes-and-clients/)
-`blockchain.nodeURLForExternalChecks` | URL of the node that a [light web client](https://github.com/guillheu/DeSign#light-web-client) would use to connect to the blockchain | This can be useful to have be different than `blockchain.nodeURL`, for instance if the client is running it's own local node for which the link differs whether the call is made from the local network or from the internet. It's also possible that the client does not wish to have their local node used by external calls at all
+`blockchain.nodeURLForExternalChecks` | URL of the node that a [light web client](https://github.com/guillheu/DeSign#light-web-client) would use to connect to the blockchain | This can be useful to have be different than `blockchain.nodeURL`, for instance if the client is running its own local node for which the link differs whether the call is made from the local network or from the internet. It is also possible that the client does not wish to have their local node used by external calls at all
 `blockchain.gasPrice` | Gas price in Wei to use for transactions | Currently gas price is static. See [Future features](https://github.com/guillheu/DeSign#future-features)
 `blockchain.gasLimit` | Maximum gas to use in a block | [Helpful link](https://ethereum.stackexchange.com/questions/50283/why-is-there-block-gas-limit#:~:text=gas%20limit%20of%20a%20block%20defines%20maximum%20gas,who%20could%20make%20an%20effective%20infinite%20transaction%20loop.)
 `storage.SQLconnexionLink` | URL to connect to the SQL database | Username and password currently included in the link. See [Future features](https://github.com/guillheu/DeSign#future-features)
@@ -85,13 +87,14 @@ Configuration field name | Description | Notes
 `storage.SQLDataColumnName` | Name of the data column in the given SQL table | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
 `storage.idColumnName` | Name of the unique document ID column in the given SQL table | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
 `storage.SQLDriver` | Name of the Java driver to use to interact with the SQL database | See [this list of drivers](https://www.roseindia.net/tutorial/java/jdbc/listofjdbcdriver.html). Note that not all drivers may be implemented.
-`documents.defaultPath` | Default location to import files from and export proofs of signature to | Format may vary depending on operating system. be sure to include a final slash (`/`) or backslash (`\`)
+`documents.defaultPath` | Default location to import files from and export proofs of signature to | Format may vary depending on operating system. Be sure to include a final slash (`/`) or backslash (`\`)
 
-This file must be named `config.properties`.
 
 To run the executable jar release, run this command :
-`java -jar path/to/jar/DeSignApp.jar path/to/config/config.properties`
+`java -jar path/to/jar/DeSignApp.jar path/to/config/file`
+
 To run the TOMCAT war file, place the `config.properties` file in the  `[TOMCAT_FOLDER]/webapps/DeSignApp/WEB-INF/classes/` folder.
+This file must be named `config.properties` when using the war file implementation.
 
 
 # Future features
@@ -120,7 +123,7 @@ Signing a Merkle tree root is equivalent to signing all the documents that make 
 
 
 ### **"Can I make a program that would verify the proof of signature for a given document ?"**
-Yes, and we encourage you to ! The point of the proof of signature is to have the least equivocable way of identifying a signature. Our implementation (the [light web client](https://github.com/guillheu/DeSign#light-web-client)) was posted to IPFS precisely to reduce the likelyhood that someone somewhere may falsify the result being displayed on screen and make the proof more trustworthy and legally potent. Having third-party implementations of our proof of signature checker would further that aim.
+Yes, and we encourage you to ! The point of the proof of signature is to have the least equivocable way of identifying a signature. Our implementation (the [light web client](https://github.com/guillheu/DeSign#light-web-client)) was posted to IPFS precisely to reduce the likelyhood that someone somewhere may falsify the result being displayed on screen in order to make the proof more trustworthy and legally potent. Having third-party implementations of our proof of signature checker would further that aim.
 
 
 ### **"What node URL should I use ?"**
@@ -129,11 +132,11 @@ The node URL depends on the network you want to connect to. One way to get one i
 
 ### **"Why are there 2 node URLs in the config file ?"**
 The `blockchain.nodeURL` is the URL of the node the client you're running will send transactions to.
-The `blockchain.nodeURLForExternalChecks` is the URL that will be included in the proofs of signature
+The `blockchain.nodeURLForExternalChecks` is the URL that will be included in the proofs of signature.
 
 
 ### **"Why use an external node URL instead of having the light web client use the local metamask installation ?"**
-We want the signature checking process to be plug-and-play even for users that know nothing about the blockchain, thus it is necessary to specify in the signature proof which node URL is to be used to check a signature. That being said, we plan on implementing the ability for the light web client user [to choose between using the provided node URL, or using their browser wallet like metamask](https://github.com/guillheu/DeSign#future-features)
+We want the signature checking process to be plug-and-play even for users that know nothing about the blockchain, thus it is necessary to specify in the signature proof which node URL is to be used to check a signature. That being said, we plan on implementing the ability for the light web client user [to choose between using the provided node URL, or using their browser wallet like metamask](https://github.com/guillheu/DeSign#future-features).
 
 
 ### **"I changed the configuration file, but my changes were not loaded into the app !"**
