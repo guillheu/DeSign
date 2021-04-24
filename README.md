@@ -59,11 +59,23 @@ storage.SQLDriver = com.mysql.cj.jdbc.Driver
 documents.defaultPath = /path/to/dir/
 ```
 
-Configuration field name | Details | Examples | Notes
------------------------- | ------- | -------- | -----
-crypto.hashAlgo          | Message digest algorithm to use in Merkle trees & index hashing | `SHA-256`; `SHA-1` | Must be compliant with the [Java](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#messagedigest-algorithms) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#supported_algorithms) implementations
-blockchain.privKey
-
+Configuration field name | Description | Example | Notes
+------------------------ | ----------- | ------- | -----
+`crypto.hashAlgo` | Message digest algorithm to use in Merkle trees & index hashing | `SHA-256` | Must be compliant with the [Java](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#messagedigest-algorithms) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#supported_algorithms) implementations
+`blockchain.privKey` | Private key of the ethereum account to sign transactions with | 0x00112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF (DO NOT USE THIS) | [Helpful link](https://vomtom.at/ethereum-private-and-public-keys/)
+`blockchain.contractAddr` | The address of the DeSign smart contract to use | `0xD8D74044703C2f98B38E048c639F2c32860cA278` | [Helpful link](https://ethereum.org/en/developers/docs/accounts/#types-of-account)
+`blockchain.nodeURL` | URL of the node to send transactions to | `https://kovan.infura.io/v3/7cdcc900133c425fab136c45f004893b` | [Helpful link](https://ethereum.org/en/developers/docs/nodes-and-clients/)
+`blockchain.nodeURLForExternalChecks` |
+`blockchain.gasPrice` |
+`blockchain.gasLimit` |
+`storage.SQLconnexionLink` |
+`storage.SQLDBName` |
+`storage.SQLTableName` |
+`storage.SQLVolumeIDColumnName` |
+`storage.SQLDataColumnName` |
+`storage.idColumnName` |
+`storage.SQLDriver` |
+`documents.defaultPath` |
 
 This file must be named `config.properties`.
 
@@ -77,7 +89,8 @@ The light web client does not require any installation. Currently it only allows
 Since this client only reads from the blockchain, it does not require metamask, and is perfectly transparent to the user.
 
 [You can find the ipfs-hosted light web client here...](https://ipfs.io/ipfs/QmcLEpxfJ2BjQiDDDuAMMDU86JeUuqibMkv9gMJudTwPug?filename=userInterface.html)
-[... Or check it's source here](https://github.com/guillheu/DeSign/blob/main/userAPI/userInterface.html)
+
+[... Or check out it's source here](https://github.com/guillheu/DeSign/blob/main/userAPI/userInterface.html)
 
 
 # Future features
@@ -88,6 +101,7 @@ Since this client only reads from the blockchain, it does not require metamask, 
 * Multi-signature from several authorized parties
 * Decentralized proofs of signature (uploaded directly onto IPFS, requires either an IPFS node or the use of filecoins)
 * More back-end storage support (local files, non-SQL databases...)
+* Auto-generating & modifying the config file from the client itself (initialization wizard)
 
 # FAQ
 
