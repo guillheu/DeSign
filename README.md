@@ -59,9 +59,11 @@ storage.SQLDriver = com.mysql.cj.jdbc.Driver
 documents.defaultPath = /path/to/dir/
 ```
 
-Configuration field name | details | examples
------------------------- | ------- | -------
-crypto.hashAlgo          | Hash algorithm to use in Merkle trees & index hashing | `SHA-256`; `SHA-1`
+Configuration field name | Details | Examples | Notes
+------------------------ | ------- | -------- | -----
+crypto.hashAlgo          | Message digest algorithm to use in Merkle trees & index hashing | `SHA-256`; `SHA-1` | Must be compliant with the [Java](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#messagedigest-algorithms) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#supported_algorithms) implementations
+blockchain.privKey
+
 
 This file must be named `config.properties`.
 
