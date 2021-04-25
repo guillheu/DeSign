@@ -9,7 +9,7 @@ It is meant to run directly onto a client's already existing infrastructure, and
 The goal is to let an entity sign documents and generate proofs of their signature with legal footing.
 
 ## Features
-* _GDPR compliant_ through the publication of hashes instead of raw documents
+* **GDPR compliant** through the publication of hashes instead of raw documents
 * Generating proofs of signature for individual documents without compromizing the confidentiality of the rest of the database
 * Much lower costs than currently available solutions
 * Signing multiple documents at once through the use of a Merkle Tree
