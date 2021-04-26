@@ -74,7 +74,7 @@ documents.defaultPath = /path/to/dir/
 Configuration field name | Description | Notes
 ------------------------ | ----------- | -----
 `crypto.hashAlgo` | Message digest algorithm to use in Merkle trees & index hashing | Must be compliant with the [Java](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#messagedigest-algorithms) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#supported_algorithms) implementations
-`blockchain.privKey` | System path to the wallet.json file to use | [Helpful link](https://kb.myetherwallet.com/en/security-and-privacy/what-is-a-keystore-file/)
+`blockchain.walletFile` | System path to the wallet.json file to use | [Helpful link](https://kb.myetherwallet.com/en/security-and-privacy/what-is-a-keystore-file/)
 `blockchain.contractAddr` | The address of the DeSign smart contract to use | [Helpful link](https://ethereum.org/en/developers/docs/accounts/#types-of-account)
 `blockchain.nodeURL` | URL of the node to send transactions to | [Helpful link](https://ethereum.org/en/developers/docs/nodes-and-clients/)
 `blockchain.nodeURLForExternalChecks` | URL of the node that a [light web client](https://github.com/guillheu/DeSign#light-web-client) would use to connect to the blockchain | This can be useful to have be different than `blockchain.nodeURL`, for instance if the client is running its own local node for which the link differs whether the call is made from the local network or from the internet. It is also possible that the client does not wish to have their local node used by external calls at all
