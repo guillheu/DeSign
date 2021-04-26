@@ -33,7 +33,7 @@ if(result == null){
  Node URL :  <%= DeSignAppLauncher.getNodeURL() %><br>
  User address :  <%= DeSignAppLauncher.getUserAddress() %><br>
  User account balance :  <%= DeSignAppLauncher.getAccountBalance() %><br>
- Node URL :  <%=DeSignAppLauncher.getContractAddress()%><br><br>
+ Contract address :  <%=DeSignAppLauncher.getContractAddress()%><br><br>
  Available actions : <br>
 <form action="./import.jsp">
 Import documents into the database <br>

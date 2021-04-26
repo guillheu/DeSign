@@ -2,11 +2,9 @@ package core;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -41,6 +39,7 @@ public class DeSignAppLauncher {
 	private static DocumentVolumeStorage localStorage;
 	private static DocumentVolumeStorage SQLStorage;
 	private static String localDBConnectionLink;
+	private static String localDBConnectionUsername;
 	private static String walletFilePath;
 	private static BigInteger gasPrice;
 	private static BigInteger gasLimit;
@@ -65,23 +64,25 @@ public class DeSignAppLauncher {
 	private static MessageDigest sha256;
 	private static Credentials creds;
 	private static ContractGasProvider gasProvider;
-	private static String SQLLinkTemplate;
-	private static DeSignCore coreLocalStorage;
 	private static DeSignCore coreSQLDB;
 	
 	
 	public static void initFromWeb() throws Exception {
-		String pwd = (new Configurations()).properties(new File("./pwd")).getString("pwd");
-		init("./config.properties", pwd);
+		String wltPwd = (new Configurations()).properties(new File("./wlt.pwd")).getString("pwd");
+		String sqlPwd = (new Configurations()).properties(new File("./sql.pwd")).getString("pwd");
+		System.out.println(wltPwd);
+		System.out.println(sqlPwd);
+		init("./config.properties", wltPwd, sqlPwd);
 	}
 	
 	
-	public static void init(String configFilePath, String walletPwd) throws Exception {
+	public static void init(String configFilePath, String walletPwd, String sqlPwd) throws Exception {
 
 		config = (new Configurations()).properties(new File(configFilePath));
 		//setting values from config file
 		hashAlgo = 					config.getString("crypto.hashAlgo");
 		localDBConnectionLink = 	config.getString("storage.SQLconnexionLink");
+		localDBConnectionUsername = config.getString("storage.SQLconnexionUser");
 		walletFilePath = 			config.getString("blockchain.walletFile");
 		addr = 						config.getString("blockchain.contractAddr");
 		nodeURL = 					config.getString("blockchain.nodeURL");
@@ -101,8 +102,8 @@ public class DeSignAppLauncher {
 		
 		creds = WalletUtils.loadCredentials(walletPwd, walletFilePath);
 		sha256 = MessageDigest.getInstance(hashAlgo);
-		SQLStorage =  new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName, SQLIdColumnName);
-		coreLocalStorage = new DeSignCore(nodeURL, addr, creds, gasProvider, localStorage, sha256);
+		SQLStorage =  new SQLStorage(sha256, localDBConnectionLink, localDBConnectionUsername, sqlPwd, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName, SQLIdColumnName);
+		new DeSignCore(nodeURL, addr, creds, gasProvider, localStorage, sha256);
 		coreSQLDB = new DeSignCore(nodeURL, addr, creds, gasProvider, SQLStorage, sha256);
 	}
 	
@@ -173,11 +174,14 @@ public class DeSignAppLauncher {
 	
 	public static void main(String args[]) {
 		if(args.length >= 1) {
-			DeSignAppLauncher launcher;
 			try {
 
 				System.out.println("PLEASE ENTER WALLET FILE PASSWORD : ");
-				DeSignAppLauncher.init(args[0], String.valueOf(System.console().readPassword()));
+				String wltPwd = String.valueOf(System.console().readPassword());
+				System.out.println("PLEASE ENTER SQL DATABASE PASSWORD : ");
+				String sqlPwd = String.valueOf(System.console().readPassword());
+				DeSignAppLauncher.init(args[0], wltPwd, sqlPwd);
+				wltPwd = sqlPwd = "";	//NOT COMPLETELY SECURE
 			}
 			catch(Exception e) {
 				return;

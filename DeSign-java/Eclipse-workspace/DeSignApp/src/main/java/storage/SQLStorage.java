@@ -21,11 +21,11 @@ public class SQLStorage extends DocumentVolumeStorage {
 	private String DBName, tableName, indexHashColumnName, dataColumnName;
 	private String idColumnName;
 
-	public SQLStorage(MessageDigest hashAlgo, String connectionLink, String DBName, String tableName, String volumeIdColumnName, String dataColumnName, String sQLIdColumnName) {
+	public SQLStorage(MessageDigest hashAlgo, String connectionLink, String username, String password, String DBName, String tableName, String volumeIdColumnName, String dataColumnName, String sQLIdColumnName) {
 		
 		try {
             
-            SQLConnection = DriverManager.getConnection(connectionLink);
+            SQLConnection = DriverManager.getConnection(connectionLink, username, password);
             
         } catch (Exception e) {
             e.printStackTrace();

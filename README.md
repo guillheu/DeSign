@@ -61,7 +61,8 @@ blockchain.nodeURL = https://kovan.infura.io/v3/7cdcc900133c425fab136c45f004893b
 blockchain.nodeURLForExternalChecks = https://kovan.infura.io/v3/7cdcc900133c425fab136c45f004893b
 blockchain.gasPrice = 4100000000
 blockchain.gasLimit = 12000000
-storage.SQLconnexionLink = jdbc:mysql://127.0.0.1/?user=USER&password=PASSWORD
+storage.SQLconnexionLink = jdbc:mysql://127.0.0.1/
+storage.SQLconnexionUser = USERNAME
 storage.SQLDBName = test
 storage.SQLTableName = Documents
 storage.SQLVolumeIDColumnName = indexHash
@@ -80,7 +81,8 @@ Configuration field name | Description | Notes
 `blockchain.nodeURLForExternalChecks` | URL of the node that a [light web client](https://github.com/guillheu/DeSign#light-web-client) would use to connect to the blockchain | This can be useful to have be different than `blockchain.nodeURL`, for instance if the client is running its own local node for which the link differs whether the call is made from the local network or from the internet. It is also possible that the client does not wish to have their local node used by external calls at all
 `blockchain.gasPrice` | Gas price in Wei to use for transactions | Currently gas price is static. See [Future features](https://github.com/guillheu/DeSign#future-features)
 `blockchain.gasLimit` | Maximum gas to use in a block | [Helpful link](https://ethereum.stackexchange.com/questions/50283/why-is-there-block-gas-limit#:~:text=gas%20limit%20of%20a%20block%20defines%20maximum%20gas,who%20could%20make%20an%20effective%20infinite%20transaction%20loop.)
-`storage.SQLconnexionLink` | URL to connect to the SQL database | Username and password currently included in the link. See [Future features](https://github.com/guillheu/DeSign#future-features)
+`storage.SQLconnexionLink` | URL to connect to the SQL database | Username and password should **NOT** be included in the link
+`storage.SQLconnexionUser` | Username to use to connect to the SQL database | [Helpful link](https://dev.mysql.com/doc/mysql-security-excerpt/5.7/en/user-names.html)
 `storage.SQLDBName` | Name of the SQL database (scheme) to query | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
 `storage.SQLTableName` | Name of the table to query in the SQL database | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
 `storage.SQLVolumeIDColumnName` | Name of the document volume/index hash column in the given SQL table | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
@@ -92,11 +94,12 @@ Configuration field name | Description | Notes
 
 To run the executable jar release, run this command :
 `java -jar path/to/jar/DeSignApp.jar path/to/config/file`
-You will be asked to enter the wallet file password on startup.
+You will be asked to enter the wallet file and SQL connexion passwords on startup.
 
 To run the TOMCAT war file, place the `config.properties` file in the  `[TOMCAT_FOLDER]/webapps/DeSignApp/WEB-INF/classes/` directory.
 This file must be named `config.properties` when using the war file implementation.
-Also place a `pwd` file containing the wallet password in the `[TOMCAT_FOLDER]/webapps/DeSignApp/WEB-INF/classes/` directory. That file should have the following structure : ```pwd = [WALLET_PASSWORD]```
+Also place a `wlt.pwd` file containing the wallet password in the `[TOMCAT_FOLDER]/webapps/DeSignApp/WEB-INF/classes/` directory. That file should have the following structure : ```pwd = [WALLET_PASSWORD]``` .
+Similarily for the SQL connexion password, in a `sql.pwd` file at the same location with the same format.
 
 
 # Future features
@@ -147,3 +150,6 @@ The executable jar heavy client will only load the config file on startup. The w
 
 ### **"What's the difference between an index, a document volume and a document volume ID ?"**
 A document volume is a set of document we wish to sign all at once (by signing the root of the Merkle tree built from them). The "index" is a unique identifier of a given document volume. It can be anything, a date, a name, or even song lyrics. A document volume ID is the hash of the index that will identify all the documents that belong to a document volume ; all the documents with the same volume ID (and therefor the same index) will be in the same document volume.
+
+### **"Managing a MySQL database is such a pain, do you have a tool that can help me ?"**
+[Yes](https://www.mysql.com/products/workbench/). Note that this tool cannot create a database. However, [this docker container will](https://hub.docker.com/_/mysql).
