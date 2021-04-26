@@ -1,11 +1,15 @@
 <%@page import="core.DeSignAppLauncher"%>
 <%@page import="core.DeSignCore"%>
+<%@page import="java.io.File"%>
+<%@page import="java.io.FileNotFoundException"%>
+<%@page import="java.util.Scanner"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+  
     
 <% 
-String configFilePath = "./config.properties";
-DeSignAppLauncher launcher = new DeSignAppLauncher(configFilePath); %>  
+if(DeSignAppLauncher.getNodeURL() == null)
+	DeSignAppLauncher.initFromWeb(); %>  
 <!DOCTYPE html>
 <html>
 <head>
@@ -26,10 +30,10 @@ if(result == null){
 <%= result %><br></h3>
 
 <br>
- Node URL :  <%= launcher.getNodeURL() %><br>
- User address :  <%= launcher.getUserAddress() %><br>
- User account balance :  <%= launcher.getAccountBalance() %><br>
- Node URL :  <%=launcher.getContractAddress()%><br><br>
+ Node URL :  <%= DeSignAppLauncher.getNodeURL() %><br>
+ User address :  <%= DeSignAppLauncher.getUserAddress() %><br>
+ User account balance :  <%= DeSignAppLauncher.getAccountBalance() %><br>
+ Node URL :  <%=DeSignAppLauncher.getContractAddress()%><br><br>
  Available actions : <br>
 <form action="./import.jsp">
 Import documents into the database <br>

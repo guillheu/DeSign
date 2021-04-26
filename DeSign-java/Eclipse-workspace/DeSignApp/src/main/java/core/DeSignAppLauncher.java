@@ -2,9 +2,11 @@ package core;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -15,6 +17,7 @@ import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.io.FileUtils;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 
@@ -32,26 +35,26 @@ public class DeSignAppLauncher {
 	 * 
 	 */
 	
-	private String hashAlgo;
-	private String addr;
-	private String nodeURL;
-	private DocumentVolumeStorage localStorage;
-	private DocumentVolumeStorage SQLStorage;
-	private String localDBConnectionLink;
-	private String privateKey;
-	private BigInteger gasPrice;
-	private BigInteger gasLimit;
-	private String SQLDBName;
-	private String SQLTableName;
-	private String SQLVolumeIDColumnName;
-	private String SQLDataColumnName;
-	private String SQLIdColumnName;
-	private String externalNodeURL;
-	private String defaultFilePath;
-	private String sqlDriverClassName;
+	private static String hashAlgo;
+	private static String addr;
+	private static String nodeURL;
+	private static DocumentVolumeStorage localStorage;
+	private static DocumentVolumeStorage SQLStorage;
+	private static String localDBConnectionLink;
+	private static String walletFilePath;
+	private static BigInteger gasPrice;
+	private static BigInteger gasLimit;
+	private static String SQLDBName;
+	private static String SQLTableName;
+	private static String SQLVolumeIDColumnName;
+	private static String SQLDataColumnName;
+	private static String SQLIdColumnName;
+	private static String externalNodeURL;
+	private static String defaultFilePath;
+	private static String sqlDriverClassName;
 	
 
-	private PropertiesConfiguration config;
+	private static PropertiesConfiguration config;
 	
 	/*
 	 * 
@@ -59,24 +62,27 @@ public class DeSignAppLauncher {
 	 * 
 	 */
 	
-	static MessageDigest sha256;
-	static Credentials creds;
-	static ContractGasProvider gasProvider;
-	static String SQLLinkTemplate;
-	static DeSignCore coreLocalStorage;
-	static DeSignCore coreSQLDB;
+	private static MessageDigest sha256;
+	private static Credentials creds;
+	private static ContractGasProvider gasProvider;
+	private static String SQLLinkTemplate;
+	private static DeSignCore coreLocalStorage;
+	private static DeSignCore coreSQLDB;
 	
 	
+	public static void initFromWeb() throws Exception {
+		String pwd = (new Configurations()).properties(new File("./pwd")).getString("pwd");
+		init("./config.properties", pwd);
+	}
 	
 	
-	
-	public DeSignAppLauncher(String configFilePath) throws Exception {
-		
+	public static void init(String configFilePath, String walletPwd) throws Exception {
+
 		config = (new Configurations()).properties(new File(configFilePath));
 		//setting values from config file
 		hashAlgo = 					config.getString("crypto.hashAlgo");
 		localDBConnectionLink = 	config.getString("storage.SQLconnexionLink");
-		privateKey = 				config.getString("blockchain.privKey");
+		walletFilePath = 			config.getString("blockchain.walletFile");
 		addr = 						config.getString("blockchain.contractAddr");
 		nodeURL = 					config.getString("blockchain.nodeURL");
 		gasPrice = 					new BigInteger(config.getString("blockchain.gasPrice"));
@@ -92,14 +98,15 @@ public class DeSignAppLauncher {
 		
 		Class.forName(sqlDriverClassName).getDeclaredConstructor().newInstance();
 		gasProvider = new StaticGasProvider(gasPrice, gasLimit);
-		creds = Credentials.create(privateKey);
+		
+		creds = WalletUtils.loadCredentials(walletPwd, walletFilePath);
 		sha256 = MessageDigest.getInstance(hashAlgo);
 		SQLStorage =  new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName, SQLIdColumnName);
 		coreLocalStorage = new DeSignCore(nodeURL, addr, creds, gasProvider, localStorage, sha256);
 		coreSQLDB = new DeSignCore(nodeURL, addr, creds, gasProvider, SQLStorage, sha256);
 	}
 	
-	public String getAccountBalance() {
+	public static String getAccountBalance() {
 		try {
 			return coreSQLDB.getAddressBalance(creds.getAddress()) + "ETH\n";
 		} catch (InterruptedException | ExecutionException e) {
@@ -109,7 +116,7 @@ public class DeSignAppLauncher {
 		return "Error, try again later";
 	}
 
-	public boolean signDocumentVolume(String index, int validityTime) {
+	public static boolean signDocumentVolume(String index, int validityTime) {
 		try {
 			coreSQLDB.sign(index, validityTime*86400);
 			return true;
@@ -120,7 +127,7 @@ public class DeSignAppLauncher {
 		return false;
 	}
 
-	public String checkSignature(String index) {
+	public static String checkSignature(String index) {
 		try {
 			if(coreSQLDB.checkSignature(index)) {
 				return "Signature matched documents !\n";
@@ -134,9 +141,9 @@ public class DeSignAppLauncher {
 		}
 	}
 	
-	public boolean exportSigProof(byte[] document, String path) {
+	public static boolean exportSigProof(byte[] document, String path) {
 		try {
-			SignatureProof sigProof = coreSQLDB.getSignatureProof(document, this.externalNodeURL);
+			SignatureProof sigProof = coreSQLDB.getSignatureProof(document, externalNodeURL);
 			Gson gson = new Gson();
 			String json = gson.toJson(sigProof);
 			json = json.replace("first", "hashFrom");
@@ -150,11 +157,11 @@ public class DeSignAppLauncher {
 		return false;
 	}
 	
-	public boolean exportSigProof(int documentID, String path) {
+	public static boolean exportSigProof(int documentID, String path) {
 		return exportSigProof(coreSQLDB.getDocumentFromID(documentID), path);
 	}
 	
-	public boolean importDocument(byte[] document, String index) {
+	public static boolean importDocument(byte[] document, String index) {
 		
 
 		coreSQLDB.indexDocumentIntoStorage(document, index);
@@ -169,7 +176,8 @@ public class DeSignAppLauncher {
 			DeSignAppLauncher launcher;
 			try {
 
-				launcher = new DeSignAppLauncher(args[0]);
+				System.out.println("PLEASE ENTER WALLET FILE PASSWORD : ");
+				DeSignAppLauncher.init(args[0], String.valueOf(System.console().readPassword()));
 			}
 			catch(Exception e) {
 				return;
@@ -181,11 +189,11 @@ public class DeSignAppLauncher {
 					while(action != 1 && action != 2 && action != 3 && action != 4 && action != 5) {
 						
 						System.out.println("Welcome to DeSign\n\n"
-								+ "node URL : " + launcher.nodeURL + "\n"
-								+ "contract address : " + launcher.addr + "\n"
-								+ "your address : " + launcher.creds.getAddress() + "\n"
-								+ "SQL database connexion link : " + launcher.localDBConnectionLink + "\n\n"
-								+ "\nYour balance : " + launcher.getAccountBalance()
+								+ "node URL : " + nodeURL + "\n"
+								+ "contract address : " + addr + "\n"
+								+ "your address : " + creds.getAddress() + "\n"
+								+ "SQL database connexion link : " + localDBConnectionLink + "\n\n"
+								+ "\nYour balance : " + getAccountBalance()
 								+ "\nWhat do you want to do ?\n"
 								+ "1) Sign a document volume\n"
 								+ "2) Check a stored signature\n"
@@ -206,37 +214,37 @@ public class DeSignAppLauncher {
 						index = console.readLine();
 						System.out.println("How many days before documents expiration ?");
 						secondsBeforeExpiration = Integer.parseInt(console.readLine());
-						launcher.signDocumentVolume(index, secondsBeforeExpiration);
+						signDocumentVolume(index, secondsBeforeExpiration);
 						
 					}
 					else if(action == 2) {
 						String index;
 						System.out.println("What is the index to check ?");
 						index = console.readLine();
-						System.out.println(launcher.checkSignature(index));
+						System.out.println(checkSignature(index));
 						
 					}
 					else if(action == 3) {
 						String documentPath;
 						String documentName;
-						System.out.println("Using default path " + launcher.defaultFilePath);
-						documentPath = launcher.defaultFilePath;
+						System.out.println("Using default path " + defaultFilePath);
+						documentPath = defaultFilePath;
 						System.out.println("What is the name of the document ?");
 						documentName = console.readLine();
 						byte[] document = FileUtils.readFileToByteArray(new File(documentPath+documentName));
-						launcher.exportSigProof(document, documentPath);
+						exportSigProof(document, documentPath);
 					}
 					else if(action == 4) {
 						String documentName;
-						String documentPath = launcher.defaultFilePath;
+						String documentPath = defaultFilePath;
 						String index;
 						System.out.println("What is the index ?");
 						index = console.readLine();
-						System.out.println("Using default path " + launcher.defaultFilePath);
+						System.out.println("Using default path " + defaultFilePath);
 						System.out.println("What is the name of the document ?");
 						documentName = console.readLine();
 						byte[] document = FileUtils.readFileToByteArray(new File(documentPath + documentName));
-						launcher.importDocument(document, index);
+						importDocument(document, index);
 					}
 					else if(action == 5) {
 						int action2 = 0;
@@ -255,7 +263,7 @@ public class DeSignAppLauncher {
 						System.out.println("Please enter the address :");
 						address = console.readLine();
 						if(action2 == 1) {
-							if(launcher.isSignatory(address)) {
+							if(isSignatory(address)) {
 								System.out.println("this address is signatory !");
 							}
 							else {
@@ -263,7 +271,7 @@ public class DeSignAppLauncher {
 							}
 						}
 						else if(action2 == 2) {
-							if(launcher.isDefaultAdmin(address)) {
+							if(isDefaultAdmin(address)) {
 								System.out.println("this address is default admin !");
 							}
 							else {
@@ -271,11 +279,11 @@ public class DeSignAppLauncher {
 							}
 						}
 						else if(action2 == 3) {
-							launcher.makeSignatory(address);
+							makeSignatory(address);
 							System.out.println("Ok !");
 						}
 						else if(action2 == 4) {
-							launcher.revokeSignatory(address);
+							revokeSignatory(address);
 							System.out.println("Ok !");
 						}
 						
@@ -290,55 +298,55 @@ public class DeSignAppLauncher {
 		}
 	}
 
-	public boolean isSignatory(String address) throws Exception {
+	public static boolean isSignatory(String address) throws Exception {
 		return coreSQLDB.isSignatory(address);
 	}
 
-	public boolean isDefaultAdmin(String address) throws Exception {
+	public static boolean isDefaultAdmin(String address) throws Exception {
 		return coreSQLDB.isDefaultAdmin(address);
 	}
 
-	public void makeSignatory(String address) throws Exception {
+	public static void makeSignatory(String address) throws Exception {
 		coreSQLDB.makeSignatory(address);
 	}
 
-	public void revokeSignatory(String address) throws Exception {
+	public static void revokeSignatory(String address) throws Exception {
 		coreSQLDB.revokeSignatory(address);
 	}
 	
-	public String getHashAlgo() {
+	public static String getHashAlgo() {
 		return hashAlgo;
 	}
 
-	public String getContractAddress() {
+	public static String getContractAddress() {
 		return addr;
 	}
 
-	public String getNodeURL() {
+	public static String getNodeURL() {
 		return nodeURL;
 	}
 
-	public BigInteger getGasPrice() {
+	public static BigInteger getGasPrice() {
 		return gasPrice;
 	}
 
-	public BigInteger getGasLimit() {
+	public static BigInteger getGasLimit() {
 		return gasLimit;
 	}
 
-	public String getExternalNodeURL() {
+	public static String getExternalNodeURL() {
 		return externalNodeURL;
 	}
 
-	public String getDefaultFilePath() {
+	public static String getDefaultFilePath() {
 		return defaultFilePath;
 	}
 	
-	public String getUserAddress() {
+	public static String getUserAddress() {
 		return creds.getAddress();
 	}
 	
-	public String getUserBalance() {
+	public static String getUserBalance() {
 		try {
 			return coreSQLDB.getAddressBalance(addr).toPlainString();
 		} catch (InterruptedException | ExecutionException e) {

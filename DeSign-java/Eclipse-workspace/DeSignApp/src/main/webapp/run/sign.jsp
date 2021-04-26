@@ -4,15 +4,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-
+<% 
+if(DeSignAppLauncher.getNodeURL() == null)
+	DeSignAppLauncher.initFromWeb(); %>
     
 <% 
-String configFilePath = "./config.properties";
-DeSignAppLauncher launcher = new DeSignAppLauncher(configFilePath); 
 String index = request.getParameter("index");
 int days = Integer.parseInt(request.getParameter("daysOfValidity"));
 String result="";
-if(launcher.signDocumentVolume(index, days)){
+if(DeSignAppLauncher.signDocumentVolume(index, days)){
 	result="Signature successful!";
 }
 else{

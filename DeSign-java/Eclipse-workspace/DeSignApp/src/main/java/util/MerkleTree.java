@@ -61,10 +61,13 @@ public class MerkleTree {
    */
   public MerkleTree(List<String> leafSignatures, MessageDigest hashAlgo) {
 	this.hashAlgo = hashAlgo;
+	
     constructTree(leafSignatures);
   }
   
-  /**
+
+
+/**
    * Use this constructor when you have already constructed the tree of Nodes 
    * (from deserialization).
    * @param treeRoot

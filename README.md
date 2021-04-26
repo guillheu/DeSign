@@ -55,7 +55,7 @@ The war file release is to be deployed onto a TOMCAT server and offers a web GUI
 Here is a configuration file example :
 ```
 crypto.hashAlgo = SHA-256
-blockchain.privKey = [ETHEREUM PRIVATE KEY]
+blockchain.walletFile = path/to/wallet.json
 blockchain.contractAddr = 0xD8D74044703C2f98B38E048c639F2c32860cA278
 blockchain.nodeURL = https://kovan.infura.io/v3/7cdcc900133c425fab136c45f004893b
 blockchain.nodeURLForExternalChecks = https://kovan.infura.io/v3/7cdcc900133c425fab136c45f004893b
@@ -74,7 +74,7 @@ documents.defaultPath = /path/to/dir/
 Configuration field name | Description | Notes
 ------------------------ | ----------- | -----
 `crypto.hashAlgo` | Message digest algorithm to use in Merkle trees & index hashing | Must be compliant with the [Java](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#messagedigest-algorithms) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#supported_algorithms) implementations
-`blockchain.privKey` | Private key of the ethereum account to sign transactions with | [Helpful link](https://vomtom.at/ethereum-private-and-public-keys/)
+`blockchain.privKey` | System path to the wallet.json file to use | [Helpful link](https://kb.myetherwallet.com/en/security-and-privacy/what-is-a-keystore-file/)
 `blockchain.contractAddr` | The address of the DeSign smart contract to use | [Helpful link](https://ethereum.org/en/developers/docs/accounts/#types-of-account)
 `blockchain.nodeURL` | URL of the node to send transactions to | [Helpful link](https://ethereum.org/en/developers/docs/nodes-and-clients/)
 `blockchain.nodeURLForExternalChecks` | URL of the node that a [light web client](https://github.com/guillheu/DeSign#light-web-client) would use to connect to the blockchain | This can be useful to have be different than `blockchain.nodeURL`, for instance if the client is running its own local node for which the link differs whether the call is made from the local network or from the internet. It is also possible that the client does not wish to have their local node used by external calls at all
@@ -92,9 +92,11 @@ Configuration field name | Description | Notes
 
 To run the executable jar release, run this command :
 `java -jar path/to/jar/DeSignApp.jar path/to/config/file`
+You will be asked to enter the wallet file password on startup.
 
-To run the TOMCAT war file, place the `config.properties` file in the  `[TOMCAT_FOLDER]/webapps/DeSignApp/WEB-INF/classes/` folder.
+To run the TOMCAT war file, place the `config.properties` file in the  `[TOMCAT_FOLDER]/webapps/DeSignApp/WEB-INF/classes/` directory.
 This file must be named `config.properties` when using the war file implementation.
+Also place a `pwd` file containing the wallet password in the `[TOMCAT_FOLDER]/webapps/DeSignApp/WEB-INF/classes/` directory. That file should have the following structure : ```pwd = [WALLET_PASSWORD]```
 
 
 # Future features
@@ -104,13 +106,13 @@ This file must be named `config.properties` when using the war file implementati
 * ERC 725/735 for authentication, authorization and identidy management
 * Third party signature request with timeout
 * Multi-signature from several authorized parties
-* Importing wallet file instead of requiring an ethereum private key in the config file
 * Improved security for database login
 * Variable gas price & gas limit
 * More back-end storage support (local files, non-SQL databases...)
 * Ability for the light web client to use a browser wallet (metamask) to connect to a network instead of the node URL provided in the proof of signature
 * Auto-generating & modifying the config file from the client itself (initialization wizard)
 * Decentralized proofs of signature (uploaded directly onto IPFS, requires either an IPFS node or the use of filecoins)
+* Several security improvements...
 
 # FAQ
 

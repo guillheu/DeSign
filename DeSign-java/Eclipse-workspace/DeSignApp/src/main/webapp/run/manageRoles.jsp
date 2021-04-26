@@ -4,34 +4,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-
+<% 
+if(DeSignAppLauncher.getNodeURL() == null)
+	DeSignAppLauncher.initFromWeb(); %>
     
 <% 
-String configFilePath = "./config.properties";
-DeSignAppLauncher launcher = new DeSignAppLauncher(configFilePath); 
 String action = request.getParameter("action");
 String address = request.getParameter("address");
 String result="";
 try{
 switch(action){
 case "isSig":
-	if(launcher.isSignatory(address))
+	if(DeSignAppLauncher.isSignatory(address))
 		result = "The address " + address + " is signatory";
 	else
 		result = "The address " + address + " is not signatory";
 	break;
 case "isAdmin":
-		if(launcher.isSignatory(address))
+		if(DeSignAppLauncher.isSignatory(address))
 			result = "The address " + address + " is default admin";
 		else
 			result = "The address " + address + " is not default admin";
 	break;
 case "makeSig":
-	launcher.makeSignatory(address);
+	DeSignAppLauncher.makeSignatory(address);
 	result = "Successfully granted signatory role to " + address;
 	break;
 case "revokeSig":
-	launcher.revokeSignatory(address);
+	DeSignAppLauncher.revokeSignatory(address);
 	result = "Successfully revoked signatory role from " + address;
 	break;
 default:

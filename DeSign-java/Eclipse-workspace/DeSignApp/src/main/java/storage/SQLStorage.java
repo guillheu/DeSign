@@ -11,6 +11,7 @@ import java.util.List;
 import kotlin.Pair;
 import util.BytesUtils;
 import util.MerkleTree;
+import util.MerkleTree.Node;
 
 import java.sql.Statement;
 
@@ -72,7 +73,17 @@ public class SQLStorage extends DocumentVolumeStorage {
 			while(rs.next()) {
 				res.add(BytesUtils.bytesToHexString(hashAlgo.digest(rs.getBytes(dataColumnName))));
 			}
-			r = new MerkleTree(res, hashAlgo);
+			
+			System.out.println("NUMBER OF SIGS = " + res.size());
+			if(res.size() == 1) {
+				Node root = new Node();
+				root.sig = BytesUtils.hexStringToByteArray(res.get(0));
+				root.type = MerkleTree.ROOT_SIG_TYPE;
+				r = new MerkleTree(root, 1, 1, res);
+			}
+			else {
+				r = new MerkleTree(res, hashAlgo);
+			}
 		} catch (SQLException ex) {
 		    // handle any errors
 			System.err.println("Attempted query : " + query);

@@ -5,14 +5,15 @@
 <html>
 <head>
 
+<% 
+if(DeSignAppLauncher.getNodeURL() == null)
+	DeSignAppLauncher.initFromWeb(); %>
     
 <% 
-String configFilePath = "./config.properties";
-DeSignAppLauncher launcher = new DeSignAppLauncher(configFilePath); 
 int documentID = Integer.parseInt(request.getParameter("id"));
 String result = "Failed to export signature";
-if(launcher.exportSigProof(documentID, launcher.getDefaultFilePath())){
-	result = "successfully exported proof of signature at " + launcher.getDefaultFilePath() +"sigProof.json";
+if(DeSignAppLauncher.exportSigProof(documentID, DeSignAppLauncher.getDefaultFilePath())){
+	result = "successfully exported proof of signature at " + DeSignAppLauncher.getDefaultFilePath() +"sigProof.json";
 }
 response.sendRedirect("../?result="+result);
 %>

@@ -5,12 +5,12 @@
 <html>
 <head>
 
-    
+    <% 
+if(DeSignAppLauncher.getNodeURL() == null)
+	DeSignAppLauncher.initFromWeb(); %>
 <% 
-String configFilePath = "./config.properties";
-DeSignAppLauncher launcher = new DeSignAppLauncher(configFilePath); 
 String index = request.getParameter("index");
-String result = launcher.checkSignature(index);
+String result = DeSignAppLauncher.checkSignature(index);
 response.sendRedirect("../?result=" + result);
 %>
 <meta charset="UTF-8">

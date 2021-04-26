@@ -12,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple3;
@@ -44,7 +45,7 @@ public class DeSign_test {
 	static DocumentVolumeStorage SQLStorage;
 	static int defaultValidityTime;
 	static String localDBConnectionLink;
-	static String privateKey;
+	static String walletFilePath;
 	static BigInteger gasPrice;
 	static BigInteger gasLimit;
 	static String SQLDBName;
@@ -80,8 +81,8 @@ public class DeSign_test {
 
 	static String configFilePath = "src/test/resources/testConfig.properties";
 	static String localStoragePath = "src/test/resources/Document";
-	static String indexVolume1 = "A girl with a short skirt and a long jacket";
-	static String indexVolume2 = "Somebody to love";
+	static String indexVolume1 = "21/04/21";
+	static String indexVolume2 = "24/04/22";
 	static String linkDBVolume1;
 	static String linkDBVolume2;
 	static byte[] dataHash;
@@ -100,10 +101,9 @@ public class DeSign_test {
 			//setting values from config file
 			hashAlgo = 					config.getString("crypto.hashAlgo");
 			localDBConnectionLink = 	config.getString("storage.SQLconnexionLink");
-			privateKey = 				config.getString("blockchain.privKey");
+			walletFilePath = 			config.getString("blockchain.walletFile");
 			addr = 						config.getString("blockchain.contractAddr");
 			nodeURL = 					config.getString("blockchain.nodeURL");
-			defaultValidityTime = 		config.getInt("documents.defaultValiditytime");
 			gasPrice = 					new BigInteger(config.getString("blockchain.gasPrice"));
 			gasLimit = 					new BigInteger(config.getString("blockchain.gasLimit"));
 			SQLDBName = 				config.getString("storage.SQLDBName");
@@ -124,7 +124,7 @@ public class DeSign_test {
 
 			Class.forName(sqlDriverClassName).getDeclaredConstructor().newInstance();
 			gasProvider = new StaticGasProvider(gasPrice, gasLimit);
-			creds = Credentials.create(privateKey);
+			creds = WalletUtils.loadCredentials("toto", walletFilePath);
 			sha256 = MessageDigest.getInstance(hashAlgo);
 			dataHash = sha256.digest(FileUtils.readFileToByteArray(new File(localStoragePath)));
 			localStorage =  new TMPLocalFileStorage(localStorageRoot);
@@ -140,7 +140,8 @@ public class DeSign_test {
 	}
 	
 	@Test
-	public void testIndexation() {		
+	public void testIndexation() {	
+		System.out.println(dataHash);
 		System.out.println("send document hash = " + BytesUtils.bytesToHexString(dataHash) + "\n" +
 				"send expiration time = " + defaultValidityTime);
 		
@@ -160,35 +161,15 @@ public class DeSign_test {
 			}
 	}
 	
-	@Test
-	public void testMerkleStorage() {
-		try {
-			System.out.println("volume1 root : " +  BytesUtils.bytesToHexString(localStorage.getIndexedDocumentVolumeMerkleRoot(indexVolume1, sha256)) + "\n" + 
-			"volume2 root : " + BytesUtils.bytesToHexString(localStorage.getIndexedDocumentVolumeMerkleRoot(indexVolume2, sha256)));
-			assertNotEquals(BytesUtils.bytesToHexString(localStorage.getIndexedDocumentVolumeMerkleRoot(indexVolume1, sha256)), BytesUtils.bytesToHexString(localStorage.getIndexedDocumentVolumeMerkleRoot(indexVolume2, sha256)));
-			
-			
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	
 	@Test
 	public void testIntegration() {
 		try {
 			System.out.println("\n\nINTEGRATION TEST\n");
-			DeSignCore localDsc = new DeSignCore(nodeURL, creds, gasProvider, localStorage, sha256);
-			System.out.println("smart contract redeployed at address " + coreLocalStorage.getContractAddress());
-			fullCycle(indexVolume1, defaultValidityTime, localDsc);
-			fullCycle(indexVolume2, defaultValidityTime, localDsc);
-			fullCycle(indexVolume1, defaultValidityTime, localDsc);
-			fullCycle(indexVolume2, defaultValidityTime, localDsc);
 			
 			
 
-			localDsc = new DeSignCore(nodeURL, creds, gasProvider, SQLStorage, sha256);
+			DeSignCore localDsc = new DeSignCore(nodeURL, creds, gasProvider, SQLStorage, sha256);
 			fullCycle(indexVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume2, defaultValidityTime, localDsc);
 			fullCycle(indexVolume1, defaultValidityTime, localDsc);
@@ -233,9 +214,9 @@ public class DeSign_test {
 		
 	}
 	
-	/*@Test
+	@Test
 	public void testMySQLStorage() {
-		DocumentVolumeStorage testStorage = new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName);
+		DocumentVolumeStorage testStorage = new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName, SQLIdColumnName);
 		try {
 			byte[] res = testStorage.getIndexedDocumentVolumeMerkleRoot(indexVolume1, sha256);
 			System.out.println(BytesUtils.bytesToHexString(res));
@@ -246,7 +227,7 @@ public class DeSign_test {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}*/
+	}
 	
 	@Test
 	public void testMerklePathGenerator() {
