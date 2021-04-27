@@ -104,15 +104,17 @@ This file must be named `config.properties` when using the war file implementati
 Also place a `wlt.pwd` file containing the wallet password in the `[TOMCAT_FOLDER]/webapps/DeSignApp/WEB-INF/classes/` directory. That file should have the following structure : ```pwd = [WALLET_PASSWORD]``` .
 Similarily for the SQL connexion password, in a `sql.pwd` file at the same location with the same format.
 
-# Known bugs
+# Known bugs and other concerns
 
-*  The light web client will not be able to read the proof of signature generated for a document volume containing a single document
+* The light web client will not be able to read the proof of signature generated for a document volume containing a single document
+* The DeSign smart contract's signature storage is vulnerable to rainbow table attacks (brute forcing through a list of pre-hashed indices), however we consider this vulnerability to not be significant ([Yet, until we implement an ERC 725](#future-features)), and guarding against it (usage of a list instead of a mapping, generating and saving random salt values) would significantly increase deployment and usage costs.
 
 
 # Future features
 
 
 * REST API
+* Remove the `getIndexData` function from the smart contract and only rely on event reading to fetch signatures
 * ERC 725/735 for authentication, authorization and identidy management
 * Improved security for database login & wallet password for the WAR release
 * Multi-signature from several authorized parties

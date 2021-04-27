@@ -10,3 +10,6 @@ Mythril and Slither auditing have reported 3 security concerns :
 	- The use of block.timestamp means a miner could manipulate the validity of the stored signatures by up to 15 seconds, both when reading and writing them.
 
 We consider those concerns to be minor and the current state of the solidity code to be acceptable for deployment.
+
+### A note on the stored indices
+The DeSign smart contract's signature storage is vulnerable to rainbow table attacks (brute forcing through a list of pre-hashed indices) of the indices. However we consider this vulnerability to not be significant ([Yet, until we implement an ERC 725](https://github.com/guillheu/DeSign#future-features)), and guarding against it (usage of a list instead of a mapping, generating and saving random salt values) would significantly increase deployment and usage costs.

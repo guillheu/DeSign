@@ -13,12 +13,12 @@ Simply ensures that the OpenZeppelin AccessControl Roles features are correctly 
 
 ### testsignMerkleRoot : 
 Will attempt to sign a document volume hash to a given index hash with a given validity time through the signMerkleRoot function.
-The first attempt using the owner address should succeed (not raise an exception), while the second one, called from another address, should not, meaning a VirtualMachineError should be raised on the second attempt.
+The first attempt using the owner address should succeed (not raise an exception), while the second one, called from another address, should not, meaning a VirtualMachineError should be raised on the second attempt. The third attempt should also fail, [based on the validity time being 0](https://github.com/guillheu/DeSign/blob/main/design_pattern_decisions.md#guard-check).
 Then we attempt to read the newly written data using getIndexData. The retreived data should match the data we originally sent by being equal or slightly lower.
 Finally we attempt reading a signature from a non-existant index. That attempt should fail.
 
 ### testIntegration :
-Full integration test. Contract owner signs a document, other signatory cannot either sign nor grant themselves roles. Then, contract owner gives other signatory address the signatory role. other signatory can now sign. Signatory renounces his signatory role, and then no longer has the signatory role. Owner still has both signatory and admin roles.
+Full integration test. Contract owner signs a document (with a validity time greater than 0), other signatory can neither sign nor grant themselves roles. Then, contract owner gives other signatory address the signatory role. other signatory can now sign. Signatory renounces his signatory role, and then no longer has the signatory role. Owner still has both signatory and admin roles.
 
 
 

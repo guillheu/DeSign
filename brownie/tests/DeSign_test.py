@@ -45,6 +45,14 @@ def testsignMerkleRoot(DeSignContract):
 	else:
 		assert False
 
+	try:
+		DeSignContract.signMerkleRoot(indexHash, merkleRoot, 0, {"from":owner})
+		assert False
+	except(VirtualMachineError):
+		assert True
+	else:
+		assert False
+
 
 	########################################################
 	####test merkle root & document block link retreival####
@@ -97,6 +105,16 @@ def testIntegration(DeSignContract):
 		assert True
 	else:
 		assert False
+
+		#Additional attempt from the owner, with a validity time of 0 ; should fail
+	try:
+		DeSignContract.signMerkleRoot(indexHash, merkleRoot, 0, {"from":owner})
+		assert False
+	except(VirtualMachineError):
+		assert True
+	else:
+		assert False
+
 
 	#Checking the signature...
 	indexData = DeSignContract.getIndexData(indexHash)

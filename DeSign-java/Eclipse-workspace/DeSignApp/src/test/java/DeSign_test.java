@@ -43,7 +43,6 @@ public class DeSign_test {
 	static String hashAlgo;
 	static String addr;
 	static String nodeURL;
-	static int defaultValidityTime;
 	static String localDBConnectionLink;
 	static String localDBConnectionUsername;
 	static String walletFilePath;
@@ -82,6 +81,7 @@ public class DeSign_test {
 	 * 
 	 */
 
+	static int defaultValidityTime = 365 * 86400;
 	static String configFilePath = "src/test/resources/testConfig.properties";
 	static String localStoragePath = "src/test/resources/Document";
 	static String indexVolume1 = "A girl with a short skirt and a long jacket";

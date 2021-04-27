@@ -22,7 +22,7 @@ Sets the caller as administrator and signatory.
 Roles are implemented using OpenZeppelin's AccessControl.sol contract
 @custom:work-in-progress Role management should eventually be managed through an ERC 725
 
-### `signMerkleRoot(bytes32 _indexHash, bytes32 documentVolumeHash, uint256 _daysBeforeExpiration)` (external)
+### `signMerkleRoot(bytes32 _indexHash, bytes32 documentVolumeHash, uint256 _secondsBeforeExpiration)` (external)
 
 indexes a fingerprint to a given index and implicitly considers it a signature by the caller. The caller must have the signatory role. This function is index agnostic ; the index can be anything, like a date, a location, a person. The fingerprint and index are identifyable, but not readable : even if they're derived from sensitive information, that information is never shared with the blockchain, and they cannot be reverted to their original content.
 
