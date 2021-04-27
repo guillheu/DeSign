@@ -33,6 +33,9 @@ Since this client only reads from the blockchain, it does not require metamask, 
 ## Heavy client
 ### Setting up the SQL database
 The releases only work with a pre-deployed SQL database.
+You can deploy one manually, or through [a docker container](https://hub.docker.com/_/mysql)
+
+
 The database must have a table (`storage.SQLTableName` in the properties file) with at least these 3 columns : 
 * an INT id primary key (`storage.idColumnName`)
 * a BLOB column for the 32 bytes index hashes (`storage.SQLVolumeIDColumnName`)
@@ -107,9 +110,9 @@ Similarily for the SQL connexion password, in a `sql.pwd` file at the same locat
 
 * REST API
 * ERC 725/735 for authentication, authorization and identidy management
-* Third party signature request with timeout
+* Improved security for database login & wallet password for the WAR release
 * Multi-signature from several authorized parties
-* Improved security for database login
+* Third party signature request with timeout
 * Variable gas price & gas limit
 * More back-end storage support (local files, non-SQL databases...)
 * Ability for the light web client to use a browser wallet (metamask) to connect to a network instead of the node URL provided in the proof of signature
