@@ -106,8 +106,7 @@ Similarily for the SQL connexion password, in a `sql.pwd` file at the same locat
 
 # Known bugs and other concerns
 
-* The light web client will not be able to read the proof of signature generated for a document volume containing a single document
-* The DeSign smart contract's signature storage is vulnerable to rainbow table attacks (brute forcing through a list of pre-hashed indices), however we consider this vulnerability to not be significant ([Yet, until we implement an ERC 725](#future-features)), and guarding against it (usage of a list instead of a mapping, generating and saving random salt values) would significantly increase deployment and usage costs.
+* The DeSign smart contract's signature storage is vulnerable to rainbow table attacks (brute forcing through a list of pre-hashed indices), however we consider this vulnerability to not be significant ([yet, until we implement an ERC 725](#future-features), because then, protecting user identifying data stored within the signature, and therefor the accessibility of the signature, becomes a much bigger concern), and guarding against it (usage of a list instead of a mapping, generating and saving random salt values) would significantly increase deployment and usage costs.
 
 
 # Future features
