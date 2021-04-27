@@ -70,8 +70,6 @@ public class DeSignAppLauncher {
 	public static void initFromWeb() throws Exception {
 		String wltPwd = (new Configurations()).properties(new File("./wlt.pwd")).getString("pwd");
 		String sqlPwd = (new Configurations()).properties(new File("./sql.pwd")).getString("pwd");
-		System.out.println(wltPwd);
-		System.out.println(sqlPwd);
 		init("./config.properties", wltPwd, sqlPwd);
 	}
 	

@@ -290,6 +290,8 @@ public class MerkleTree {
 
 
 public List<Pair<String, String>> getMerklePath(String leafSig) throws Exception {
+	if(leafNodes.size() == 0)
+		return null;
 	List<Pair<String, String>> r = new ArrayList<Pair<String,String>>();
 	Node current;
 	Node parent;

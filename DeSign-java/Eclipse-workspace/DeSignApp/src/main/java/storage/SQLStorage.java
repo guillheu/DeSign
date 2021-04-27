@@ -195,6 +195,14 @@ public class SQLStorage extends DocumentVolumeStorage {
 			while(rs.next()) {
 				documentBytes = rs.getBytes(dataColumnName);
 			}
+			System.err.println("LOOK AT THIS !!");
+			System.err.println("LOOK AT THIS !!");
+			System.err.println("LOOK AT THIS !!");
+			System.err.println("LOOK AT THIS !!");
+			System.err.println("LOOK AT THIS !!");
+			System.err.println("LOOK AT THIS !!");
+			System.err.println(documentBytes);
+			System.err.println(query);
 		} catch (SQLException ex) {
 		    // handle any errors
 			System.err.println("Attempted query : " + query);

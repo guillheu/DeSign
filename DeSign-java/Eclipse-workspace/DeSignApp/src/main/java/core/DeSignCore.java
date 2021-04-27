@@ -136,14 +136,16 @@ public class DeSignCore {
 				Pair<String,String> entry = new Pair<String,String>(step.component1(),"0x"+step.component2());
 				r.merklePath.add(entry);
 			}
-			r.indexHash = "0x"+BytesUtils.bytesToHexString(storage.getIndexHash(document));
-			r.contractAddr = contract.getContractAddress();
-			r.nodeURL = nodeURL;
-			r.hashAlgo = hashAlgo.getAlgorithm();
+			
+		} catch (NullPointerException e) {
+			System.err.println("Merkle tree only contains a single document, moving on...");
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		r.indexHash = "0x"+BytesUtils.bytesToHexString(storage.getIndexHash(document));
+		r.contractAddr = contract.getContractAddress();
+		r.nodeURL = nodeURL;
+		r.hashAlgo = hashAlgo.getAlgorithm();
 		return r;
 	}
 	
