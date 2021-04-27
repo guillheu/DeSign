@@ -1,6 +1,8 @@
 import static org.junit.Assert.*;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -41,10 +43,9 @@ public class DeSign_test {
 	static String hashAlgo;
 	static String addr;
 	static String nodeURL;
-	static DocumentVolumeStorage localStorage;
-	static DocumentVolumeStorage SQLStorage;
 	static int defaultValidityTime;
 	static String localDBConnectionLink;
+	static String localDBConnectionUsername;
 	static String walletFilePath;
 	static BigInteger gasPrice;
 	static BigInteger gasLimit;
@@ -65,7 +66,9 @@ public class DeSign_test {
 	 * Core components
 	 * 
 	 */
-	
+
+	static DocumentVolumeStorage localStorage;
+	static DocumentVolumeStorage SQLStorage;
 	static MessageDigest sha256;
 	static Credentials creds;
 	static ContractGasProvider gasProvider;
@@ -81,13 +84,12 @@ public class DeSign_test {
 
 	static String configFilePath = "src/test/resources/testConfig.properties";
 	static String localStoragePath = "src/test/resources/Document";
-	static String indexVolume1 = "21/04/21";
-	static String indexVolume2 = "24/04/22";
-	static String linkDBVolume1;
-	static String linkDBVolume2;
+	static String indexVolume1 = "A girl with a short skirt and a long jacket";
+	static String indexVolume2 = "Somebody to love";
 	static byte[] dataHash;
 	static int amountOfLeaves = 7;
 	static String secondUser = "0x74DCaFDc8591f44a1516b0CB2B979223b3c4fad1";
+
 
 
 	
@@ -101,6 +103,7 @@ public class DeSign_test {
 			//setting values from config file
 			hashAlgo = 					config.getString("crypto.hashAlgo");
 			localDBConnectionLink = 	config.getString("storage.SQLconnexionLink");
+			localDBConnectionUsername = config.getString("storage.SQLconnexionUser");
 			walletFilePath = 			config.getString("blockchain.walletFile");
 			addr = 						config.getString("blockchain.contractAddr");
 			nodeURL = 					config.getString("blockchain.nodeURL");
@@ -116,23 +119,33 @@ public class DeSign_test {
 			defaultFilePath = 			config.getString("documents.defaultPath");
 			sqlDriverClassName = 		config.getString("storage.SQLDriver");
 			
+			BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 			
-			
+			System.out.println("PLEASE ENTER WALLET FILE PASSWORD : ");
+			String wltPwd = console.readLine();
+			System.out.println("PLEASE ENTER SQL DATABASE PASSWORD : ");
+			String sqlPwd = console.readLine();
 			
 			
 			
 
 			Class.forName(sqlDriverClassName).getDeclaredConstructor().newInstance();
 			gasProvider = new StaticGasProvider(gasPrice, gasLimit);
-			creds = WalletUtils.loadCredentials("toto", walletFilePath);
+			creds = WalletUtils.loadCredentials(wltPwd, walletFilePath);
+			
 			sha256 = MessageDigest.getInstance(hashAlgo);
 			dataHash = sha256.digest(FileUtils.readFileToByteArray(new File(localStoragePath)));
 			localStorage =  new TMPLocalFileStorage(localStorageRoot);
-			SQLStorage =  new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName, SQLIdColumnName);
+			SQLStorage =  new SQLStorage(sha256, localDBConnectionLink, localDBConnectionUsername, sqlPwd, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName, SQLIdColumnName);
+			
+
+			wltPwd = sqlPwd = "";	//NOT COMPLETELY SECURE
+			
 			coreLocalStorage = new DeSignCore(nodeURL, addr, creds, gasProvider, localStorage, sha256);
 			coreSQLDB = new DeSignCore(nodeURL, addr, creds, gasProvider, SQLStorage, sha256);
-			linkDBVolume1 = BytesUtils.bytesToHexString(sha256.digest(indexVolume1.getBytes()));
-			linkDBVolume2 = BytesUtils.bytesToHexString(sha256.digest(indexVolume2.getBytes()));
+			
+			
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -159,6 +172,9 @@ public class DeSign_test {
 				System.out.println("lol ??");
 				e.printStackTrace();
 			}
+			
+			
+			
 	}
 	
 	
@@ -169,9 +185,11 @@ public class DeSign_test {
 			
 			
 
-			DeSignCore localDsc = new DeSignCore(nodeURL, creds, gasProvider, SQLStorage, sha256);
+			DeSignCore localDsc = new DeSignCore(nodeURL, creds, gasProvider, localStorage, sha256);
 			fullCycle(indexVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume2, defaultValidityTime, localDsc);
+			
+			localDsc = new DeSignCore(nodeURL, creds, gasProvider, SQLStorage, sha256);
 			fullCycle(indexVolume1, defaultValidityTime, localDsc);
 			fullCycle(indexVolume2, defaultValidityTime, localDsc);
 		} catch (Exception e) {
@@ -216,9 +234,8 @@ public class DeSign_test {
 	
 	@Test
 	public void testMySQLStorage() {
-		DocumentVolumeStorage testStorage = new SQLStorage(sha256, localDBConnectionLink, SQLDBName, SQLTableName, SQLVolumeIDColumnName, SQLDataColumnName, SQLIdColumnName);
 		try {
-			byte[] res = testStorage.getIndexedDocumentVolumeMerkleRoot(indexVolume1, sha256);
+			byte[] res = SQLStorage.getIndexedDocumentVolumeMerkleRoot(indexVolume1, sha256);
 			System.out.println(BytesUtils.bytesToHexString(res));
 			assertTrue(BytesUtils.bytesToHexString(res).equals(BytesUtils.bytesToHexString(localStorage.getIndexedDocumentVolumeMerkleRoot(indexVolume1, sha256))));
 			
@@ -266,6 +283,14 @@ public class DeSign_test {
 	
 	@Test
 	public void testGenerateSignatureProof() {
+		
+		try {
+			coreSQLDB.sign(indexVolume1, 365);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		byte[] document = "This is document 1".getBytes();
 		byte[] current = sha256.digest(document);
 		SignatureProof sigProof = coreSQLDB.getSignatureProof(document, nodeURL);

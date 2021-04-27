@@ -81,16 +81,16 @@ Configuration field name | Description | Notes
 `blockchain.walletFile` | System path to the wallet.json file to use | [Helpful link](https://kb.myetherwallet.com/en/security-and-privacy/what-is-a-keystore-file/)
 `blockchain.contractAddr` | The address of the DeSign smart contract to use | [Helpful link](https://ethereum.org/en/developers/docs/accounts/#types-of-account)
 `blockchain.nodeURL` | URL of the node to send transactions to | [Helpful link](https://ethereum.org/en/developers/docs/nodes-and-clients/)
-`blockchain.nodeURLForExternalChecks` | URL of the node that a [light web client](https://github.com/guillheu/DeSign#light-web-client) would use to connect to the blockchain | This can be useful to have be different than `blockchain.nodeURL`, for instance if the client is running its own local node for which the link differs whether the call is made from the local network or from the internet. It is also possible that the client does not wish to have their local node used by external calls at all
-`blockchain.gasPrice` | Gas price in Wei to use for transactions | Currently gas price is static. See [Future features](https://github.com/guillheu/DeSign#future-features)
+`blockchain.nodeURLForExternalChecks` | URL of the node that a [light web client](#light-web-client) would use to connect to the blockchain | This can be useful to have be different than `blockchain.nodeURL`, for instance if the client is running its own local node for which the link differs whether the call is made from the local network or from the internet. It is also possible that the client does not wish to have their local node used by external calls at all
+`blockchain.gasPrice` | Gas price in Wei to use for transactions | Currently gas price is static. See [Future features](#future-features)
 `blockchain.gasLimit` | Maximum gas to use in a block | [Helpful link](https://ethereum.stackexchange.com/questions/50283/why-is-there-block-gas-limit#:~:text=gas%20limit%20of%20a%20block%20defines%20maximum%20gas,who%20could%20make%20an%20effective%20infinite%20transaction%20loop.)
 `storage.SQLconnexionLink` | URL to connect to the SQL database | Username and password should **NOT** be included in the link
 `storage.SQLconnexionUser` | Username to use to connect to the SQL database | [Helpful link](https://dev.mysql.com/doc/mysql-security-excerpt/5.7/en/user-names.html)
-`storage.SQLDBName` | Name of the SQL database (scheme) to query | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
-`storage.SQLTableName` | Name of the table to query in the SQL database | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
-`storage.SQLVolumeIDColumnName` | Name of the document volume/index hash column in the given SQL table | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
-`storage.SQLDataColumnName` | Name of the data column in the given SQL table | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
-`storage.idColumnName` | Name of the unique document ID column in the given SQL table | See [Setting up the SQL database](https://github.com/guillheu/DeSign#setting-up-the-sql-database)
+`storage.SQLDBName` | Name of the SQL database (scheme) to query | See [Setting up the SQL database](#setting-up-the-sql-database)
+`storage.SQLTableName` | Name of the table to query in the SQL database | See [Setting up the SQL database](#setting-up-the-sql-database)
+`storage.SQLVolumeIDColumnName` | Name of the document volume/index hash column in the given SQL table | See [Setting up the SQL database](#setting-up-the-sql-database)
+`storage.SQLDataColumnName` | Name of the data column in the given SQL table | See [Setting up the SQL database](#setting-up-the-sql-database)
+`storage.idColumnName` | Name of the unique document ID column in the given SQL table | See [Setting up the SQL database](#setting-up-the-sql-database)
 `storage.SQLDriver` | Name of the Java driver to use to interact with the SQL database | See [this list of drivers](https://www.roseindia.net/tutorial/java/jdbc/listofjdbcdriver.html). Note that not all drivers may be implemented.
 `documents.defaultPath` | Default location to import files from and export proofs of signature to | Format may vary depending on operating system. Be sure to include a final slash (`/`) or backslash (`\`)
 
@@ -103,6 +103,10 @@ To run the TOMCAT war file, place the `config.properties` file in the  `[TOMCAT_
 This file must be named `config.properties` when using the war file implementation.
 Also place a `wlt.pwd` file containing the wallet password in the `[TOMCAT_FOLDER]/webapps/DeSignApp/WEB-INF/classes/` directory. That file should have the following structure : ```pwd = [WALLET_PASSWORD]``` .
 Similarily for the SQL connexion password, in a `sql.pwd` file at the same location with the same format.
+
+# Known bugs
+
+*  The light web client will not be able to read the proof of signature generated for a document volume containing a single document
 
 
 # Future features
@@ -129,9 +133,11 @@ Similarily for the SQL connexion password, in a `sql.pwd` file at the same locat
 ### **"Why sign Merkle tree roots instead of signing the documents directly ?"**
 Signing a Merkle tree root is equivalent to signing all the documents that make up the Merkle tree, allowing us to reduce costs by sending a single transaction instead of potentially hundreds or thousands.
 
+### **"Where are the contracts ? And their tests ? And the docs ?"**
+The smart contracts are developped using the brownie framework. You will find them in the brownie/contracts directory. Their tests are in the brownie/tests directory. The docs are in the docs directory
 
 ### **"Can I make a program that would verify the proof of signature for a given document ?"**
-Yes, and we encourage you to ! The point of the proof of signature is to have the least equivocable way of identifying a signature. Our implementation (the [light web client](https://github.com/guillheu/DeSign#light-web-client)) was posted to IPFS precisely to reduce the likelyhood that someone somewhere may falsify the result being displayed on screen in order to make the proof more trustworthy and legally potent. Having third-party implementations of our proof of signature checker would further that aim.
+Yes, and we encourage you to ! The point of the proof of signature is to have the least equivocable way of identifying a signature. Our implementation (the [light web client](#light-web-client)) was posted to IPFS precisely to reduce the likelyhood that someone somewhere may falsify the result being displayed on screen in order to make the proof more trustworthy and legally potent. Having third-party implementations of our proof of signature checker would further that aim.
 
 
 ### **"What node URL should I use ?"**
@@ -144,11 +150,11 @@ The `blockchain.nodeURLForExternalChecks` is the URL that will be included in th
 
 
 ### **"Why use an external node URL instead of having the light web client use the local metamask installation ?"**
-We want the signature checking process to be plug-and-play even for users that know nothing about the blockchain, thus it is necessary to specify in the signature proof which node URL is to be used to check a signature. That being said, we plan on implementing the ability for the light web client user [to choose between using the provided node URL, or using their browser wallet like metamask](https://github.com/guillheu/DeSign#future-features).
+We want the signature checking process to be plug-and-play even for users that know nothing about the blockchain, thus it is necessary to specify in the signature proof which node URL is to be used to check a signature. That being said, we plan on implementing the ability for the light web client user [to choose between using the provided node URL, or using their browser wallet like metamask](#future-features).
 
 
 ### **"I changed the configuration file, but my changes were not loaded into the app !"**
-The executable jar heavy client will only load the config file on startup. The war file release however will load the config file each time a page is loaded.
+The executable jar and web server war files heavy clients will only load the config file on startup. Make sure to restart the CLI app, or reload the webapp tomcat server manager.
 
 
 ### **"What's the difference between an index, a document volume and a document volume ID ?"**
@@ -156,3 +162,6 @@ A document volume is a set of document we wish to sign all at once (by signing t
 
 ### **"Managing a MySQL database is such a pain, do you have a tool that can help me ?"**
 [Yes](https://www.mysql.com/products/workbench/). Note that this tool cannot create a database. However, [this docker container will](https://hub.docker.com/_/mysql).
+
+### **"How do I import your Eclipse project into my IDE ?"**
+I have not yet looked into making my project fully portable. If you are having trouble with importing the sources, [please check existing issues, or submit a new one](https://github.com/guillheu/DeSign/issues/)
