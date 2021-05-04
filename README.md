@@ -25,7 +25,7 @@ The goal is to let an entity sign documents and generate proofs of their signatu
 The light web client does not require any installation. Currently it only allows the user to check the validity of a signature from the original unaltered file and the proof of signature file.
 Since this client only reads from the blockchain, it does not require metamask, and is perfectly transparent to the user.
 
-[You can find the ipfs-hosted light web client here...](https://ipfs.io/ipfs/QmcLEpxfJ2BjQiDDDuAMMDU86JeUuqibMkv9gMJudTwPug?filename=userInterface.html)
+[You can find the ipfs-hosted light web client here...](https://ipfs.io/ipfs/QmRNm6HByNcvkUYA8tsrXBftp6otkMHvdxd7EghmUpHEA5?filename=userInterface.html)
 
 [... Or check out it's source here](https://github.com/guillheu/DeSign/blob/main/userAPI/userInterface.html)
 
