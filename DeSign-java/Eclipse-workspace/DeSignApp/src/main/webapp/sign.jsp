@@ -10,7 +10,7 @@
 <title>Sign document volume</title>
 </head>
 <body>
-<form action="./run/sign.jsp">
+<form action="./run/sign.jsp" method="POST">
 Index of the volume to sign <br>
 <input type="text" name="index"><br>
 days of validity <br>

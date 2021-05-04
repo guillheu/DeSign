@@ -11,6 +11,7 @@ import kotlin.Pair;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.gas.ContractGasProvider;
@@ -73,8 +74,8 @@ public class DeSignCore {
 		return contract.getIndexData(indexHash).send();
 	}
 	
-	public void signMerkleRoot(byte[] indexHash, byte[] merkleRoot, int daysBeforeExpiration) throws Exception {
-		contract.signMerkleRoot(indexHash, merkleRoot, BigInteger.valueOf(daysBeforeExpiration)).send();
+	public TransactionReceipt signMerkleRoot(byte[] indexHash, byte[] merkleRoot, int daysBeforeExpiration) throws Exception {
+		return contract.signMerkleRoot(indexHash, merkleRoot, BigInteger.valueOf(daysBeforeExpiration)).send();
 	}
 	
 	public BigDecimal getAddressBalance(String address) throws InterruptedException, ExecutionException {
@@ -90,15 +91,12 @@ public class DeSignCore {
 	 * 
 	 */
 	
-	public void sign(String index, int lifetime) throws Exception {
-		signMerkleRoot(hashAlgo.digest(index.getBytes()), storage.getIndexedDocumentVolumeMerkleRoot(index, hashAlgo), lifetime);
+	public TransactionReceipt sign(String index, int lifetime) throws Exception {
+		return signMerkleRoot(hashAlgo.digest(index.getBytes()), storage.getIndexedDocumentVolumeMerkleRoot(index, hashAlgo), lifetime);
 	}
 	
 	public Boolean checkSignature(String index) throws Exception {
 		Tuple3<byte[], BigInteger, String> r = getIndexInfo(index);
-		System.out.println("found signature : " + BytesUtils.bytesToHexString(r.component1()));
-		System.out.println("signed by " + r.component3());
-		System.out.println("valid for " + r.component2().divide(BigInteger.valueOf(86400)).floatValue()+ "days");
 		return (BytesUtils.bytesToHexString(r.component1()).equals(BytesUtils.bytesToHexString(storage.getIndexedDocumentVolumeMerkleRoot(index, hashAlgo))));
 	}
 	
@@ -177,11 +175,11 @@ public class DeSignCore {
 		return contract.hasRole(defaultAdminRole, address).send();
 	}
 
-	public void makeSignatory(String address) throws Exception {
-		contract.grantRole(signatoryRole, address).send();
+	public TransactionReceipt makeSignatory(String address) throws Exception {
+		return contract.grantRole(signatoryRole, address).send();
 	}
 
-	public void revokeSignatory(String address) throws Exception {
-		contract.revokeRole(signatoryRole, address).send();
+	public TransactionReceipt revokeSignatory(String address) throws Exception {
+		return contract.revokeRole(signatoryRole, address).send();
 	}
 }

@@ -4,6 +4,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="../style.css" media="screen" />
 <% 
 if(DeSignAppLauncher.getNodeURL() == null)
 	DeSignAppLauncher.initFromWeb(); %>
@@ -21,35 +22,46 @@ case "isSig":
 		result = "The address " + address + " is not signatory";
 	break;
 case "isAdmin":
-		if(DeSignAppLauncher.isSignatory(address))
+		if(DeSignAppLauncher.isDefaultAdmin(address))
 			result = "The address " + address + " is default admin";
 		else
 			result = "The address " + address + " is not default admin";
 	break;
 case "makeSig":
 	DeSignAppLauncher.makeSignatory(address);
-	result = "Successfully granted signatory role to " + address;
+	result = "Successfully granted signatory role to " + address+ "<br>";
 	break;
 case "revokeSig":
 	DeSignAppLauncher.revokeSignatory(address);
-	result = "Successfully revoked signatory role from " + address;
+	result = "Successfully revoked signatory role from " + address+ "<br>";
 	break;
 default:
 	result="unknown action";
 	break;
 }
+
+
+result += "<br>Transaction hash : "+DeSignAppLauncher.getLastTransaction().getTransactionHash()+ "<br>";
+result += "Block number : "+DeSignAppLauncher.getLastTransaction().getBlockNumber() + "<br>";
+result += "Gas used : "+DeSignAppLauncher.getLastTransaction().getCumulativeGasUsed()+ "<br>";
+
 }
 
 catch(Exception e){
 	result="bad request";
 }
 
-response.sendRedirect("../?result=" + result);
+
+
 %>
 <meta charset="UTF-8">
-<title>signing document volume</title>
+<title>manage roles</title>
 </head>
 <body>
 
+<%= result %>
+<form action="../">
+<input type="submit" value="back"><br>
+</form><br>
 </body>
 </html>

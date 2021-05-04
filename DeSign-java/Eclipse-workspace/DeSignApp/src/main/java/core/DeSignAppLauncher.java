@@ -16,6 +16,8 @@ import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.io.FileUtils;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 
@@ -65,6 +67,7 @@ public class DeSignAppLauncher {
 	private static Credentials creds;
 	private static ContractGasProvider gasProvider;
 	private static DeSignCore coreSQLDB;
+	private static TransactionReceipt lastTransaction;
 	
 	
 	public static void initFromWeb() throws Exception {
@@ -117,7 +120,7 @@ public class DeSignAppLauncher {
 
 	public static boolean signDocumentVolume(String index, int validityTime) {
 		try {
-			coreSQLDB.sign(index, validityTime*86400);
+			lastTransaction = coreSQLDB.sign(index, validityTime*86400);
 			return true;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -126,17 +129,12 @@ public class DeSignAppLauncher {
 		return false;
 	}
 
-	public static String checkSignature(String index) {
+	public static boolean checkSignature(String index) {
 		try {
-			if(coreSQLDB.checkSignature(index)) {
-				return "Signature matched documents !\n";
-			}
-			else {
-				return "Signatures did not match - Check database integrity\n";
-			}
+			return coreSQLDB.checkSignature(index);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return "Something went wrong";
+			return false;
 		}
 	}
 	
@@ -309,11 +307,11 @@ public class DeSignAppLauncher {
 	}
 
 	public static void makeSignatory(String address) throws Exception {
-		coreSQLDB.makeSignatory(address);
+		lastTransaction = coreSQLDB.makeSignatory(address);
 	}
 
-	public static void revokeSignatory(String address) throws Exception {
-		coreSQLDB.revokeSignatory(address);
+	public static TransactionReceipt revokeSignatory(String address) throws Exception {
+		return coreSQLDB.revokeSignatory(address);
 	}
 	
 	public static String getHashAlgo() {
@@ -356,5 +354,20 @@ public class DeSignAppLauncher {
 			e.printStackTrace();
 		}
 		return "THERE WAS AN ERROR";
+	}
+
+
+	public static TransactionReceipt getLastTransaction() {
+		return lastTransaction;
+	}
+	
+	public static Tuple3<byte[], BigInteger, String> getIndexInfo(String index) {
+		try {
+			return coreSQLDB.getIndexInfo(index);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

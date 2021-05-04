@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-
+<link rel="stylesheet" type="text/css" href="../style.css" media="screen" />
 <% 
 if(DeSignAppLauncher.getNodeURL() == null)
 	DeSignAppLauncher.initFromWeb(); %>
@@ -15,12 +15,15 @@ String result = "Failed to export signature";
 if(DeSignAppLauncher.exportSigProof(documentID, DeSignAppLauncher.getDefaultFilePath())){
 	result = "successfully exported proof of signature at " + DeSignAppLauncher.getDefaultFilePath() +"sigProof.json";
 }
-response.sendRedirect("../?result="+result);
 %>
 <meta charset="UTF-8">
-<title>signing document volume</title>
+<title>proof of signature export</title>
 </head>
 <body>
 
+<%= result %>
+<form action="../">
+<input type="submit" value="back"><br>
+</form><br>
 </body>
 </html>

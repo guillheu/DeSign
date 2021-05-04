@@ -8,8 +8,9 @@
  <link rel="stylesheet" type="text/css" href="style.css" media="screen" /> 
     
 <% 
-if(DeSignAppLauncher.getNodeURL() == null)
-	DeSignAppLauncher.initFromWeb(); %>  
+if(DeSignAppLauncher.getNodeURL() == null){
+	DeSignAppLauncher.initFromWeb(); 
+	}%>  
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,17 +18,6 @@ if(DeSignAppLauncher.getNodeURL() == null)
 <title>DeSign web admin</title>
 </head>
 <body>
-<%
-String result;
-
-result = request.getParameter("result");
-if(result == null){
-	result = "";
-}
-
-%>
-<h3>
-<%= result %><br></h3>
 
 <br>
  Node URL :  <%= DeSignAppLauncher.getNodeURL() %><br>
