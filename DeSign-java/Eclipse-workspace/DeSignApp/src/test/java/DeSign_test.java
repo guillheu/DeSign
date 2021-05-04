@@ -114,7 +114,7 @@ public class DeSign_test {
 			SQLVolumeIDColumnName = 	config.getString("storage.SQLVolumeIDColumnName");
 			SQLDataColumnName = 		config.getString("storage.SQLDataColumnName");
 			SQLIdColumnName = 			config.getString("storage.idColumnName");
-			localStorageRoot = 			config.getString("storage.localStorageRoot");
+			localStorageRoot = 			"/home/old/dante/Documents/DeSign/DeSign/DeSign-java/Eclipse-workspace/DeSignApp/src/test/resources/";
 			externalNodeURL = 			config.getString("blockchain.nodeURLForExternalChecks");
 			defaultFilePath = 			config.getString("documents.defaultPath");
 			sqlDriverClassName = 		config.getString("storage.SQLDriver");

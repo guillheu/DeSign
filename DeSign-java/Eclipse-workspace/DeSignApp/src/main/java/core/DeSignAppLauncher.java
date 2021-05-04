@@ -94,7 +94,7 @@ public class DeSignAppLauncher {
 		externalNodeURL = 			config.getString("blockchain.nodeURLForExternalChecks");
 		defaultFilePath = 			config.getString("documents.defaultPath");
 		sqlDriverClassName = 		config.getString("storage.SQLDriver");
-		
+		System.out.println(walletFilePath);
 		Class.forName(sqlDriverClassName).getDeclaredConstructor().newInstance();
 		gasProvider = new StaticGasProvider(gasPrice, gasLimit);
 		
