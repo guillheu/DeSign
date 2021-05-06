@@ -107,7 +107,8 @@ Similarily for the SQL connexion password, in a `sql.pwd` file at the same locat
 # Known bugs and other concerns
 
 * The DeSign smart contract's signature storage is vulnerable to rainbow table attacks (brute forcing through a list of pre-hashed indices), however we consider this vulnerability to not be significant ([yet, until we implement an ERC 725](#future-features), because then, protecting user identifying data stored within the signature, and therefor the accessibility of the signature, becomes a much bigger concern), and guarding against it (usage of a list instead of a mapping, generating and saving random salt values) would significantly increase deployment and usage costs.
-
+* The Etherscan links given after a transaction are currently statically coded to always link to the kovan etherscan site. This will be fixed once we figure out how to get web3j to provide us with the chain ID or network ID
+* The site is ugly. We know. We're not UI/UX developers. You're free to offer your contribution.
 
 # Future features
 
@@ -118,12 +119,14 @@ Similarily for the SQL connexion password, in a `sql.pwd` file at the same locat
 * Improved security for database login & wallet password for the WAR release
 * Multi-signature from several authorized parties
 * Third party signature request with timeout
+* Third party signatures (without need for Ethereum address, only needing a private key)
 * Variable gas price & gas limit
 * More back-end storage support (local files, non-SQL databases...)
 * Ability for the light web client to use a browser wallet (metamask) to connect to a network instead of the node URL provided in the proof of signature
 * Auto-generating & modifying the config file from the client itself (initialization wizard)
 * Decentralized proofs of signature (uploaded directly onto IPFS, requires either an IPFS node or the use of filecoins)
-* Several security improvements...
+* Using IPNS to update the light web client
+* Auto-update tomcat client on config file changes
 
 # FAQ
 
@@ -166,3 +169,6 @@ A document volume is a set of document we wish to sign all at once (by signing t
 
 ### **"How do I import your Eclipse project into my IDE ?"**
 I have not yet looked into making my project fully portable. If you are having trouble with importing the sources, [please check existing issues, or submit a new one](https://github.com/guillheu/DeSign/issues/)
+
+### **"How do I use the local files storage system ?"**
+We heavily recommend that you simply do not use it (for now). Little to no work or thought has been put into it since we branched out of it in favor of the SQL database solution. If you are interested in using it, do not hesitate to contact us to let us know what your priorities are.
