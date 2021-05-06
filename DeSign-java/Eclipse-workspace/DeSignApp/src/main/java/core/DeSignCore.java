@@ -155,8 +155,9 @@ public class DeSignCore {
 		public String hashAlgo;
 	}
 
-	public void indexDocumentIntoStorage(byte[] document, String index) {
-		storage.importDocument(document, index, hashAlgo);
+	public int indexDocumentIntoStorage(byte[] document, String index) {
+		 storage.importDocument(document, index, hashAlgo);
+		 return storage.getIDFromDocument(document);
 	}
 
 	public byte[] getDocumentFromID(int documentID) {
@@ -181,5 +182,12 @@ public class DeSignCore {
 
 	public TransactionReceipt revokeSignatory(String address) throws Exception {
 		return contract.revokeRole(signatoryRole, address).send();
+	}
+
+	public int getNetworkID() {
+		//TODO : figure out how to get network ID from web3j
+		//System.out.println(web3.admin);
+		//return (int) web3.netVersion().getId();
+		return 42; //Defaulting to Kovan
 	}
 }

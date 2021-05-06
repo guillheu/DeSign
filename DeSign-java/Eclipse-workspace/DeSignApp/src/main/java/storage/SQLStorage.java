@@ -158,7 +158,6 @@ public class SQLStorage extends DocumentVolumeStorage {
 		try {
 			stmt = SQLConnection.createStatement();
 			stmt.executeUpdate(query);
-
 			//System.err.println("running the following query : \n" + query);
 		} catch (SQLException ex) {
 		    // handle any errors
@@ -220,4 +219,44 @@ public class SQLStorage extends DocumentVolumeStorage {
 		return documentBytes;
 	}
 
+	@Override
+	public int getIDFromDocument(byte[] document) {
+	Statement stmt = null;
+	ResultSet rs = null;
+	int id = 0;
+	
+	String query = "SELECT " + idColumnName + " FROM " + DBName + "." + tableName + " WHERE "+ dataColumnName + " = 0x" + BytesUtils.bytesToHexString(document) + ";";
+	
+	try {
+		stmt = SQLConnection.createStatement();
+		rs = stmt.executeQuery(query);
+
+		//System.err.println("running the following query : \n" + query);
+		while(rs.next()) {
+			id = rs.getInt(idColumnName);
+		}
+	} catch (SQLException ex) {
+	    // handle any errors
+		System.err.println("Attempted query : " + query);
+	    System.err.println("SQLException: " + ex.getMessage());
+	    System.err.println("SQLState: " + ex.getSQLState());
+	    System.err.println("VendorError: " + ex.getErrorCode());
+	    ex.printStackTrace();
+	}
+	finally {
+	    if (rs != null) {
+	        try {
+	            rs.close();
+	        } catch (SQLException sqlEx) { } // ignore
+	        rs = null;
+	    }
+	    if (stmt != null) {
+	        try {
+	            stmt.close();
+	        } catch (SQLException sqlEx) { } // ignore
+	        stmt = null;
+	    }
+	}
+	return id;
+	}
 }

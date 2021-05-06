@@ -1,4 +1,5 @@
 <%@page import="core.DeSignAppLauncher"%>
+<%@page import="web.WebHelper"%>
 <%@page import="org.web3j.protocol.core.methods.response.Log"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
@@ -15,13 +16,11 @@ String index = request.getParameter("index");
 int days = Integer.parseInt(request.getParameter("daysOfValidity"));
 String result="";
 if(DeSignAppLauncher.signDocumentVolume(index, days)){
-	result="Signature successful!<br><br>";
-	result += "Transaction hash : "+DeSignAppLauncher.getLastTransaction().getTransactionHash()+ "<br>";
-	result += "Block number : "+DeSignAppLauncher.getLastTransaction().getBlockNumber() + "<br>";
-	result += "Gas used : "+DeSignAppLauncher.getLastTransaction().getCumulativeGasUsed()+ "<br>";
+	result = "Signature successful !<br>";
+	result += WebHelper.printTransaction(DeSignAppLauncher.getLastTransaction(), DeSignAppLauncher.getNetworkID());
 }
 else{
-	result = "Signature failed";
+	result = "Signature failed<br>";
 }
 
 

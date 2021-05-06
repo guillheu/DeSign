@@ -158,12 +158,11 @@ public class DeSignAppLauncher {
 		return exportSigProof(coreSQLDB.getDocumentFromID(documentID), path);
 	}
 	
-	public static boolean importDocument(byte[] document, String index) {
+	public static int importDocument(byte[] document, String index) {
 		
 
-		coreSQLDB.indexDocumentIntoStorage(document, index);
+		return coreSQLDB.indexDocumentIntoStorage(document, index);
 		
-		return true;
 	}
 	
 	
@@ -188,7 +187,7 @@ public class DeSignAppLauncher {
 					int action = 0;
 					while(action != 1 && action != 2 && action != 3 && action != 4 && action != 5) {
 						
-						System.out.println("Welcome to DeSign\n\n"
+						System.out.println("\nWelcome to DeSign\n\n"
 								+ "node URL : " + nodeURL + "\n"
 								+ "contract address : " + addr + "\n"
 								+ "your address : " + creds.getAddress() + "\n"
@@ -214,14 +213,29 @@ public class DeSignAppLauncher {
 						index = console.readLine();
 						System.out.println("How many days before documents expiration ?");
 						secondsBeforeExpiration = Integer.parseInt(console.readLine());
-						signDocumentVolume(index, secondsBeforeExpiration);
+						if(signDocumentVolume(index, secondsBeforeExpiration)) {
+							System.out.println("Signature successful !");
+							System.out.println(getLastTransactionInfo());
+						}
+						else {
+							System.out.println("Transaction failed");
+						}
 						
 					}
 					else if(action == 2) {
 						String index;
 						System.out.println("What is the index to check ?");
 						index = console.readLine();
-						System.out.println(checkSignature(index));
+						if(checkSignature(index)) {
+							Tuple3<byte[], BigInteger, String> r = getIndexInfo(index);
+							System.out.println("Signature matched documents - database integrity validated for this index");
+							
+							System.out.println("Signed by : " + r.component3());
+							System.out.println("Valid for : " + r.component2().floatValue()/86400 + " days");
+						}
+						else {
+							
+						}
 						
 					}
 					else if(action == 3) {
@@ -232,7 +246,12 @@ public class DeSignAppLauncher {
 						System.out.println("What is the name of the document ?");
 						documentName = console.readLine();
 						byte[] document = FileUtils.readFileToByteArray(new File(documentPath+documentName));
-						exportSigProof(document, documentPath);
+						if(exportSigProof(document, documentPath)) {
+							System.out.println("Proof of signature successfully exported at " + documentPath + "sigProof.json");
+						}
+						else {
+							System.err.println("Proof of signature export failed! Is this document in the database ?");
+						}
 					}
 					else if(action == 4) {
 						String documentName;
@@ -244,7 +263,9 @@ public class DeSignAppLauncher {
 						System.out.println("What is the name of the document ?");
 						documentName = console.readLine();
 						byte[] document = FileUtils.readFileToByteArray(new File(documentPath + documentName));
-						importDocument(document, index);
+						
+						System.out.println("Document successfully imported at index " + importDocument(document, index));
+						
 					}
 					else if(action == 5) {
 						int action2 = 0;
@@ -280,11 +301,13 @@ public class DeSignAppLauncher {
 						}
 						else if(action2 == 3) {
 							makeSignatory(address);
-							System.out.println("Ok !");
+							System.out.println(address + " Is now signatory!");
+							System.out.println(getLastTransactionInfo());
 						}
 						else if(action2 == 4) {
 							revokeSignatory(address);
-							System.out.println("Ok !");
+							System.out.println(address + "Is no longer signatory!");
+							System.out.println(getLastTransactionInfo());
 						}
 						
 					}
@@ -310,8 +333,8 @@ public class DeSignAppLauncher {
 		lastTransaction = coreSQLDB.makeSignatory(address);
 	}
 
-	public static TransactionReceipt revokeSignatory(String address) throws Exception {
-		return coreSQLDB.revokeSignatory(address);
+	public static void revokeSignatory(String address) throws Exception {
+		lastTransaction = coreSQLDB.revokeSignatory(address);
 	}
 	
 	public static String getHashAlgo() {
@@ -369,5 +392,17 @@ public class DeSignAppLauncher {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public static int getNetworkID() {
+		return coreSQLDB.getNetworkID();
+	}
+	
+	private static String getLastTransactionInfo() {
+		String r = "";
+		r += "Transaction hash : " + lastTransaction.getTransactionHash();
+		r += "\nBlock number : " + lastTransaction.getBlockNumber();
+		r += "\nGas used : " + lastTransaction.getCumulativeGasUsed();
+		return r;
 	}
 }

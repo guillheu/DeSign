@@ -17,4 +17,7 @@ public abstract class DocumentVolumeStorage {
 
 
 	public abstract byte[] getDocumentFromID(int documentID);
+
+
+	public abstract int getIDFromDocument(byte[] document);
 }
